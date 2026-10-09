@@ -1,14 +1,36 @@
 #include <stdio.h>
-#include "../lib/reg.h"
+#include <string.h>
+#include <stdlib.h>
+#include "../lib/usr.h"
 
-int main(void)
+
+int main()
 {
-    if (register_user() != 0)
+    int choice;
+    printf("Welcome to the User Management System\n");
+    printf("Please select an option:\n");
+    printf("1. Register\n");
+    printf("2. Login\n");
+    printf("3. Exit\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+    getchar(); // Consume the newline character left by scanf
+
+    switch (choice)
     {
-        fprintf(stderr, "Error occurred while registering user.\n");
-        return 1;
+        case 1:
+            reg_user();
+            break;
+        case 2:
+            login();
+            break;
+        case 3:
+            printf("Exiting the program.\n");
+            exit(0);
+        default:
+            printf("Invalid choice. Please try again.\n");
+            break;
     }
 
-    printf("User registered successfully.\n");
     return 0;
 }
