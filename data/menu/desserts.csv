@@ -1,0 +1,5 @@
+id,name,category,price,stock,reorder_level
+401,Ice Cream,Dessert,120,20,
+402,Fruit salad,Dessert,120,15,
+403,Pudding,Dessert,150,25,
+404,Cake Slice,Dessert,110,20,

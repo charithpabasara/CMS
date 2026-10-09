@@ -1,0 +1,5 @@
+id,name,category,price,stock,reorder_level
+101,Chicken Rice,Meal,450,10,5
+102,Fried Noodles,Meal,120,20,5
+103,Vegetable Rice,Meal,180,15,10
+104,Egg Fried Rice,Meal,250,12,5

@@ -1,0 +1,5 @@
+id,name,category,price,stock,reorder_level
+201,Sandwich,Snacks,100,8,3
+202,Vegetable Roti,Snacks,80,15,
+203,Egg Roll,Snacks,100,15,
+204,Samosa,Snacks,80,15,

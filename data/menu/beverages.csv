@@ -1,0 +1,5 @@
+id,name,category,price,stock,reorder_level
+301,Tea,Beverages,55,25,
+302,Coffee,Beverages,50,25,
+303,Fresh Juice ,Beverages,100,25,
+304,Soft Drinks,Beverages,100,25,
