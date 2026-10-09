@@ -1,6 +1,9 @@
 # CMS
-first mini project using C. (Canteen management system)
 
-The admin login uses the password on the first line of `data/admin_password.txt`.
-Change that file's contents to set the admin password. Keep the file private:
-it stores the password as plain text.
+<ui>
+  <li>lib - include all header files</li>
+  <li>data - include all data files (auth.csv)</li>
+  <li>src - include all c files</li>
+  <li>docs - include all document files</li>
+</ui>
+
