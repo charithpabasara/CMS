@@ -13,7 +13,7 @@ int login(const char *username, const char *password)
         
 //read the credentials from the file
 
-    fp = fopen("credentials.csv", "r");
+    fp = fopen("./credentials.csv", "r");
     if (fp == NULL)
         return 0;
 
@@ -46,7 +46,9 @@ int login(const char *username, const char *password)
             return 1;
         }
         else
-            printf("Error : Username and password does not match \n");
+            printf("Please Re-enter your credentials \n");
+            printf("Error : Username and password does not match. \n");
+            
     }
 
     fclose(fp);
