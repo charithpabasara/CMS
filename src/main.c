@@ -37,12 +37,12 @@ int main(void)
         switch (choice)
         {
             case 1:
-                reg_user();
                 clrscr();
+                reg_user();
                 break;
             case 2:
-                login();
                 clrscr();
+                login();
                 break;
             case 3:
                 printf("Exiting the program.\n");
