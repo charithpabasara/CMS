@@ -2,6 +2,6 @@
 #define USR_H
 
 void reg_user(void);
-void login(void);
+int login();
 
 #endif
