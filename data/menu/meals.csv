@@ -1,5 +1,10 @@
 id,name,category,price,stock,reorder_level
-101,Chicken Rice,Meal,450,10,5
-102,Fried Noodles,Meal,120,20,5
-103,Vegetable Rice,Meal,180,15,10
-104,Egg Fried Rice,Meal,250,12,5
+101,Chicken Rice,Meal,450.00,27,25
+102,Fried Noodles,Meal,120.00,30,25
+103,Vegetable Rice,Meal,180.00,30,10
+104,Egg Fried Rice,Meal,250.00,30,25
+105,Egg Kottu,Meal,200.00,30,40
+106,Parata  (1),Meal,40.00,26,40
+107,Noodles,Meal,100.00,30,40
+108,Pasta,Meal,180.00,30,40
+109,Mix Kottu,Meal,250.00,30,40

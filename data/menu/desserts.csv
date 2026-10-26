@@ -1,5 +1,5 @@
 id,name,category,price,stock,reorder_level
-401,Ice Cream,Dessert,120,20,
-402,Fruit salad,Dessert,120,15,
-403,Pudding,Dessert,150,25,
-404,Cake Slice,Dessert,110,20,
+401,Ice Cream,Dessert,120.00,20,0
+402,Fruit salad,Dessert,120.00,15,0
+403,Pudding,Dessert,150.00,25,0
+404,Cake Slice,Dessert,110.00,20,0
