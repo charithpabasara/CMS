@@ -7,12 +7,20 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "-std=c17",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-I${workspaceFolder}\\lib",
+                "${workspaceFolder}\\src\\main.c",
+                "${workspaceFolder}\\src\\reg.c",
+                "${workspaceFolder}\\src\\login.c",
+                "${workspaceFolder}\\src\\admin_auth.c",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${workspaceFolder}\\cms.exe"
             ],
             "options": {
-                "cwd": "C:/msys64/ucrt64/bin"
+                "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [
                 "$gcc"

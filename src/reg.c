@@ -3,117 +3,113 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include "../lib/admin_auth.h"
 
-#if defined(_WIN32) || defined(_WIN64)
-#include <conio.h>
-
-static bool get_hidden_password(char *password, size_t size)
-{
-    size_t i = 0;
-    bool too_long = false;
-    int ch;
-
-    while ((ch = _getch()) != '\r' && ch != '\n') {
-        if (ch == 0 || ch == 224) {
-            (void)_getch();
-        } else if (ch == '\b') {
-            if (i > 0) {
-                i--;
-                too_long = false;
-            }
-        } else if (i < size - 1) {
-            password[i++] = (char)ch;
-        } else {
-            too_long = true;
-        }
-    }
-
-    password[i] = '\0';
-    putchar('\n');
-    return !too_long;
-}
-
-#else
-#include <termios.h>
-#include <unistd.h>
-
-static bool get_hidden_password(char *password, size_t size)
-{
-    struct termios old_settings;
-    struct termios new_settings;
-
-    if (tcgetattr(STDIN_FILENO, &old_settings) != 0) {
-        return false;
-    }
-
-    new_settings = old_settings;
-    new_settings.c_lflag &= (tcflag_t)~ECHO;
-
-    if (tcsetattr(STDIN_FILENO, TCSANOW, &new_settings) != 0) {
-        return false;
-    }
-
-    char *result = fgets(password, (int)size, stdin);
-    bool too_long = false;
-
-    if (result != NULL && strchr(password, '\n') == NULL && !feof(stdin)) {
-        int ch = getchar();
-        if (ch != '\n' && ch != EOF) {
-            too_long = true;
-            while (ch != '\n' && ch != EOF) {
-                ch = getchar();
-            }
-        }
-    }
-
-    int restore_result = tcsetattr(STDIN_FILENO, TCSANOW, &old_settings);
-    putchar('\n');
-
-    if (result == NULL || restore_result != 0 || too_long) {
-        password[0] = '\0';
-        return false;
-    }
-
-    password[strcspn(password, "\n")] = '\0';
-    return true;
-}
-#endif
-
-bool validate_username(char *username);
+bool validate_username(const char *username);
 bool validate_nic(const char *nic);
 
-void reg_user(void)
+typedef struct {
+     char username[50];
+     char password[30];
+     char nic[14];
+} user;
+
+/* Read a complete input line, draining and rejecting values that do not fit. */
+static int read_field(const char *prompt, char *buffer, size_t capacity)
 {
-    char username[50], password[30];
-    char nic[13];
+    size_t length = 0;
+    int ch;
+    int too_long = 0;
+
+    printf("%s", prompt);
+    fflush(stdout);
+
+    while ((ch = getchar()) != EOF && ch != '\n')
+    {
+        if (length + 1 < capacity)
+        {
+            buffer[length++] = (char)ch;
+        }
+        else
+        {
+            too_long = 1;
+        }
+    }
+
+    if (ch == EOF && ferror(stdin))
+    {
+        return -1;
+    }
+    if (ch == EOF && length == 0 && !too_long)
+    {
+        return -1;
+    }
+
+    if (length > 0 && buffer[length - 1] == '\r')
+    {
+        length--;
+    }
+    buffer[length] = '\0';
+    return too_long ? 0 : 1;
+}
+
+/* Match login's environment override and default credentials-file paths. */
+static FILE *open_credentials_file_for_append(void)
+{
+    const char *configured_path = getenv("CREDENTIALS_FILE");
+    static const char *const fallback_paths[] = {
+        "data/credentials.csv","../data/credentials.csv" };
+        
+    FILE *file;
+    size_t i;
+
+    if (configured_path != NULL && configured_path[0] != '\0')
+    {
+        return fopen(configured_path, "a");
+    }
+
+    for (i = 0; i < sizeof(fallback_paths) / sizeof(fallback_paths[0]); i++)
+    {
+        file = fopen(fallback_paths[i], "a");
+        if (file != NULL)
+        {
+            return file;
+        }
+    }
+
+    return NULL;
+}
+
+int reg_user(void)
+{
+    user l;
     FILE *log;
-    const char *credentials_path = "../data/credentials.csv";
-
-    if (fopen(credentials_path, "r") == NULL)
-    {
-        credentials_path = "data/credentials.csv";
-    }
-
-    log = fopen(credentials_path, "a");
-    if (log == NULL)
-    {
-        printf("Error opening file.\n");
-        exit(1);
-    }
+    int input_result;
 
     printf("Please enter your details here\n");
 
+    /* Keep prompting until the username contains only letters, digits, or underscores. */
     while (1)
     {
-        printf("\tUsername: ");
-        if (fgets(username, sizeof username, stdin) == NULL)
+        input_result = read_field("\tUsername: ", l.username, sizeof l.username);
+        if (input_result < 0)
         {
-            fclose(log);
-            exit(1);
+            return EXIT_FAILURE;
         }
-        username[strcspn(username, "\n")] = '\0';
 
-        if (validate_username(username))
+        if (input_result == 0)
+        {
+            printf("Username is too long.\n");
+            continue;
+        }
+
+        if (admin_is_reserved_username(l.username))
+        {
+            printf("That username is reserved.\n");
+            continue;
+        }
+
+        if (validate_username(l.username))
         {
             break;
         }
@@ -121,44 +117,80 @@ void reg_user(void)
         printf("Invalid username. Please use only alphanumeric characters and underscores.\n");
     }
 
-    printf("\tPassword: ");
-    if (!get_hidden_password(password, sizeof password))
+    /* Read the password normally; input is visible while the user types. */
+    input_result = read_field("\tPassword: ", l.password, sizeof l.password);
+    if (input_result < 0)
     {
         fprintf(stderr, "Error reading password.\n");
-        fclose(log);
-        exit(1);
+        return EXIT_FAILURE;
+    }
+    if (input_result == 0)
+    {
+        fprintf(stderr, "Password is too long.\n");
+        return EXIT_FAILURE;
+    }
+    if (l.password[0] == '\0' ||
+        strchr(l.password, ',') != NULL ||
+        isspace((unsigned char)l.password[0]) ||
+        isspace((unsigned char)l.password[strlen(l.password) - 1]))
+    {
+        fprintf(stderr, "Password must be nonempty and cannot contain commas or surrounding whitespace.\n");
+        return EXIT_FAILURE;
     }
 
+    /* Accept only NIC values containing between 1 and 13 digits. */
     do
     {
-        printf("\tNIC (up to 13 digits): ");
-        if (fgets(nic, sizeof nic, stdin) == NULL)
+        input_result = read_field("\tNIC (up to 13 digits): ",
+                                  l.nic, sizeof l.nic);
+        if (input_result < 0)
         {
-            fclose(log);
-            exit(1);
+            return EXIT_FAILURE;
         }
-        nic[strcspn(nic, "\n")] = '\0';
+        if (input_result == 0)
+        {
+            printf("NIC input is too long.\n");
+            continue;
+        }
 
-        if (!validate_nic(nic))
+        if (!validate_nic(l.nic))
         {
             printf("Invalid NIC. Enter 1 to 13 digits.\n");
         }
-    } while (!validate_nic(nic));
+    } while (!validate_nic(l.nic));
 
-    fprintf(log, "%s, %s, %s\n", nic, username, password);
-    fclose(log);
+    /* Open the data file only after all interactive input has been collected. */
+    log = open_credentials_file_for_append();
+    if (log == NULL)
+    {
+        fprintf(stderr, "Error opening credentials file.\n");
+        return EXIT_FAILURE;
+    }
+
+    /* Append the collected values as a CSV row. */
+    if (fprintf(log, "%s, %s, %s\n", l.nic, l.username, l.password) < 0)
+    {
+        fprintf(stderr, "Could not write the new user record.\n");
+        fclose(log);
+        return EXIT_FAILURE;
+    }
+    if (fclose(log) != 0)
+    {
+        fprintf(stderr, "Could not finish saving the new user record.\n");
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 
-bool validate_username(char *username)
+/* Return true when the username is nonempty and contains only allowed characters. */
+bool validate_username(const char *username)
 {
-    size_t i;
-
     if (username[0] == '\0')
     {
         return false;
     }
 
-    for (i = 0; username[i] != '\0'; i++)
+    for (size_t i = 0; username[i] != '\0'; i++)
     {
         if (!isalnum((unsigned char)username[i]) && username[i] != '_')
         {
@@ -169,17 +201,17 @@ bool validate_username(char *username)
     return true;
 }
 
+/* Return true when the NIC contains between 1 and 13 decimal digits. */
 bool validate_nic(const char *nic)
 {
-    size_t i;
-    size_t len = strlen(nic);
+    size_t length = strlen(nic);
 
-    if (len == 0 || len > 13)
+    if (length == 0 || length > 13)
     {
         return false;
     }
 
-    for (i = 0; i < len; i++)
+    for (size_t i = 0; i < length; i++)
     {
         if (!isdigit((unsigned char)nic[i]))
         {
