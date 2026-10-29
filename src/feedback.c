@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include "feedback.h"
 
 
 //structure to store feedback details
@@ -9,7 +12,7 @@ struct Feedback {
 	int orderId;
 	int foodRating;
 	int serviceRating;
-	char comment[100];
+	char comment[500];
 };
 
 
@@ -21,35 +24,94 @@ void submitFeedback(void)
     struct Feedback f;
     FILE *fp;
 
-    printf("Enter Order ID: ");
-    if (scanf("%d", &f.orderId) != 1) {
-        printf("Invalid Order ID!\n");
-        while (getchar() != '\n');
-        return;
-    }
+  printf("Enter Order ID: ");
+
+int ch;
+while ((ch = getchar()) != '\n' && ch != EOF);
+
+char input[100];
+char *endptr;
+
+if (fgets(input, sizeof(input), stdin) == NULL) {
+    printf("Invalid Order ID!\n");
+    return;
+}
+
+f.orderId = (int)strtol(input, &endptr, 10);
+
+while (isspace((unsigned char)*endptr)) {
+    endptr++;
+}
+
+if (endptr == input || *endptr != '\0' || f.orderId <= 0) {
+    printf("Invalid Order ID!\n");
+    return;
+}
 
     printf("Enter Food Rating (1-5): ");
-    if (scanf("%d", &f.foodRating) != 1 ||
-        f.foodRating < 1 || f.foodRating > 5) {
+
+    if (fgets(input, sizeof(input), stdin) == NULL)
+    {
         printf("Invalid Food Rating!\n");
-        while (getchar() != '\n');
         return;
     }
+    
+    f.foodRating = (int)strtol(input, &endptr, 10);
+
+    while(isspace((unsigned char)*endptr))
+    {
+        endptr++;
+    }
+
+    if(endptr == input || *endptr != '\0' ||
+       f.foodRating < 1 || f.foodRating > 5)
+       {
+        printf("Invalid Food Rating!\n");
+        return;
+       }
+
+        
+    
 
     printf("Enter Service Rating (1-5): ");
-    if (scanf("%d", &f.serviceRating) != 1 ||
-        f.serviceRating < 1 || f.serviceRating > 5) {
+
+    if(fgets(input, sizeof(input), stdin) == NULL)
+    {
         printf("Invalid Service Rating!\n");
-        while (getchar() != '\n');
         return;
     }
 
-    // Clear the input buffer
-    while (getchar() != '\n');
+    f.serviceRating = (int)strtol(input, &endptr, 10);
+
+    while(isspace((unsigned char)*endptr))
+    {
+        endptr++;
+    }
+
+    if(endptr == input || *endptr !='\0' ||
+       f.serviceRating < 1 || f.serviceRating > 5)
+
+    {
+        printf("Invalid Service Rating!\n");
+        return;
+    }   
+
+    
 
     printf("Enter your comments:\n");
+
     if (fgets(f.comment, sizeof(f.comment), stdin) == NULL) {
         printf("Failed to read comment!\n");
+        return;
+    }
+
+    if(strchr(f.comment, '\n') == NULL)
+    {
+        int ch;
+
+        while ((ch = getchar()) != '\n' && ch != EOF);
+
+        printf("Comment is too long! Please enter a shorter comment.\n");
         return;
     }
 
@@ -62,13 +124,21 @@ void submitFeedback(void)
     }
 
     // Save feedback details
-    fprintf(fp, "%d %d %d %s",
+    if (fprintf(fp, "%d %d %d %s",
             f.orderId,
             f.foodRating,
             f.serviceRating,
-            f.comment);
+            f.comment) < 0) {
 
-    fclose(fp);
+                printf("Error saving feedback!\n");
+                fclose(fp);
+                return;
+            }
+
+    if(fclose(fp) != 0) {
+        printf("Error closing feedback file!\n");
+        return;
+    }
 
     printf("Feedback submitted successfully!\n");
 }
@@ -109,11 +179,19 @@ void viewFeedback(void)
             break;
         }
 
+        if (f.orderId <= 0 ||
+            f.foodRating < 1 || f.foodRating > 5 ||
+            f.serviceRating < 1 || f.serviceRating > 5)
+        {
+            printf("Invalid feedback record found!\n");
+            continue;
+        }
 
-        printf("\nOredr ID: %d\n",f.orderId);
+
+        printf("\nOrder ID: %d\n",f.orderId);
         printf("Food Rating: %d\n",f.foodRating);
         printf("Service Rating: %d\n",f.serviceRating);
-        printf("COmment: %s",f.comment);
+        printf("Comment: %s",f.comment);
 
     }
     
@@ -127,8 +205,7 @@ void calculateAverageRatings(void)
     FILE *fp;
     struct Feedback f;
 
-    int totalFoodRating = 0;
-    int totalServiceRating =0;
+    
     int count = 0;
 
     fp = fopen("feedback.txt", "r");
@@ -153,9 +230,22 @@ void calculateAverageRatings(void)
 
             }
 
+            //Validate feedback records
+            if(f.orderId <= 0 ||
+               f.foodRating < 1 || f.foodRating > 5 ||
+               f.serviceRating < 1 || f.serviceRating > 5)
+
+            {
+                printf("Invalid feedback record found!\n");
+                continue;
+            }
+
             foodTotal += f.foodRating;
             serviceTotal += f.serviceRating;
             count++;
+
+
+            
           }
 
           fclose(fp);
@@ -203,12 +293,20 @@ void viewComplaints(void)
             break;
         }
 
+        if (f.orderId <= 0 ||
+            f.foodRating < 1 || f.foodRating > 5 ||
+            f.serviceRating < 1 || f.serviceRating > 5)
+        {
+            printf("Invalid feedback record found!\n");
+            continue;
+        }
 
-        //Low ratings are treated as possible comlaints
+
+        //Low ratings are treated as possible complaints
        
         if (f.foodRating <= 2 || f.serviceRating <= 2)
         {
-            printf("\n Order ID: %d\n",f.orderId);0
+            printf("\n Order ID: %d\n",f.orderId);
             printf("Comment: %s", f.comment);
             found = 1;
         }
@@ -217,7 +315,7 @@ void viewComplaints(void)
     if (found == 0)
     {
 
-        printf("No complanints found!\n");
+        printf("No complaints found!\n");
     }
 
     fclose(fp);
