@@ -51,7 +51,7 @@ static int parse_int(const char *text, int *value)
 
 static FILE *open_feedback_file(void)
 {
-    FILE *fp = fopen("data/feedback.csv", "a");
+    FILE *fp = fopen("../data/feedback.csv", "a");
     if (fp == NULL)
     {
         fp = fopen("../data/feedback.csv", "a");
@@ -61,7 +61,7 @@ static FILE *open_feedback_file(void)
 
 static FILE *open_feedback_file_for_read(void)
 {
-    FILE *fp = fopen("data/feedback.csv", "r");
+    FILE *fp = fopen("../data/feedback.csv", "r");
     if (fp == NULL)
     {
         fp = fopen("../data/feedback.csv", "r");

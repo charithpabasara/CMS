@@ -67,9 +67,7 @@ static int read_field(const char *prompt, char *buffer, size_t capacity)
 static FILE *open_credentials_file_for_append(void)
 {
     const char *configured_path = getenv("CREDENTIALS_FILE");
-    static const char *const fallback_paths[] = {
-        "data/credentials.csv",
-        "../data/credentials.csv"
+    static const char *const fallback_paths[] = {"../data/credentials.csv","../data/credentials.csv"
     };
     FILE *file;
     size_t i;
