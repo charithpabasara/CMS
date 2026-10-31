@@ -42,7 +42,8 @@ int main()
        printf(" │                 "YELLOW" ╚██████╗██║ ╚═╝ ██║███████║"RESET"                 │ \n");
        printf(" │                  "YELLOW" ╚═════╝╚═╝     ╚═╝╚══════╝"RESET"                 │ \n");
        printf(" │                                                              │ \n");
-       printf(" │        A Terminal Canteen Manage System v1.0      "YELLOW"2026-2027"RESET"   │ \n");
+       printf(" │        A Terminal Canteen Manage System v1.0      "YELLOW"2026-2027"RESET"  │ \n");
+       printf(" │                                                              │ \n");
        printf(" └──────────────────────────────────────────────────────────────┘ \n");
        printf("\n");
 
