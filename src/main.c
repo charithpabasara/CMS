@@ -4,20 +4,53 @@
 #include <limits.h>
 #include <string.h>
 #include "../lib/usr.h"
+#include "../lib/clearscreen.h"
+#include "../lib/adminmain.h"
+#include "../lib/mainoptions.h"
 
-int main(void)
+
+// ANSI Color code define
+
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define DGREEN "\033[38;5;22m"
+#define LGREEN "\033[92m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define BOLD    "\033[1m"
+#define RESET   "\033[0m"
+
+
+void mainOptions();
+void clearScreen();
+
+int main()
 {
+    clearScreen();
     int choice;
     char input[64];
 
     while (1)
     {
-        printf("Welcome to the User Management System\n");
-        printf("Please select an option:\n");
-        printf("1. Register\n");
-        printf("2. Login\n");
-        printf("3. Exit\n");
-        printf("Enter your choice: ");
+       printf(" ┌──────────────────────────────────────────────────────────────┐ \n");
+       printf(" │ "YELLOW"Help - Press 3 or Ctrl+C to close"RESET"                            │ \n");
+       printf(" ├──────────────────────────────────────────────────────────────┤ \n");
+       printf(" │                  "YELLOW" ██████╗███╗   ███╗███████╗"RESET"                 │ \n");
+       printf(" │                 "YELLOW" ██╔════╝████╗ ████║██╔════╝"RESET"                 │ \n");
+       printf(" │                 "YELLOW" ██║     ██╔████╔██║███████║"RESET"                 │ \n");
+       printf(" │                 "YELLOW" ██║     ██║╚██╔╝██║╚════██║"RESET"                 │ \n");
+       printf(" │                 "YELLOW" ╚██████╗██║ ╚═╝ ██║███████║"RESET"                 │ \n");
+       printf(" │                  "YELLOW" ╚═════╝╚═╝     ╚═╝╚══════╝"RESET"                 │ \n");
+       printf(" │                                                              │ \n");
+       printf(" │        A Terminal Canteen Manage System v1.0      "YELLOW"2026-2027"RESET"   │ \n");
+       printf(" └──────────────────────────────────────────────────────────────┘ \n");
+       printf("\n");
+
+        printf("\tPlease select an option:\n");
+        printf("\t 1. Register\n");
+        printf("\t 2. Login\n");
+        printf("\t 3. Exit\n");
+        printf("\tEnter your choice: ");
 
         if (fgets(input, sizeof input, stdin) == NULL)
         {
@@ -57,17 +90,20 @@ int main(void)
         switch (choice)
         {
             case 1:
-                system("cls");
+                clearScreen();
                 reg_user();
+                clearScreen();
                 break;
             case 2:
-                system("cls");
+                clearScreen();
                 login();
+                clearScreen();
                 break;
             case 3:
                 printf("Exiting the program.\n");
                 return 0;
             default:
+                printf("\n");
                 printf("Invalid choice. Please try again.\n");
                 break;
         }

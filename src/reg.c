@@ -5,6 +5,17 @@
 #include <stdbool.h>
 #include "../lib/admin_auth.h"
 
+// ANSI Color code define
+
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define DGREEN "\033[38;5;22m"
+#define LGREEN "\033[92m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define BOLD    "\033[1m"
+#define RESET   "\033[0m"
+
 bool validate_username(const char *username);
 bool validate_nic(const char *nic);
 
@@ -44,7 +55,6 @@ static int read_field(const char *prompt, char *buffer, size_t capacity)
     {
         return -1;
     }
-
     if (length > 0 && buffer[length - 1] == '\r')
     {
         length--;
@@ -58,8 +68,9 @@ static FILE *open_credentials_file_for_append(void)
 {
     const char *configured_path = getenv("CREDENTIALS_FILE");
     static const char *const fallback_paths[] = {
-        "data/credentials.csv","../data/credentials.csv" };
-        
+        "data/credentials.csv",
+        "../data/credentials.csv"
+    };
     FILE *file;
     size_t i;
 
@@ -76,7 +87,6 @@ static FILE *open_credentials_file_for_append(void)
             return file;
         }
     }
-
     return NULL;
 }
 
@@ -86,86 +96,89 @@ int reg_user(void)
     FILE *log;
     int input_result;
 
-    printf("Please enter your details here\n");
-
-    /* Keep prompting until the username contains only letters, digits, or underscores. */
-    while (1)
-    {
-        input_result = read_field("\tUsername: ", l.username, sizeof l.username);
-        if (input_result < 0)
-        {
-            return EXIT_FAILURE;
-        }
-
-        if (input_result == 0)
-        {
-            printf("Username is too long.\n");
-            continue;
-        }
-
-        if (admin_is_reserved_username(l.username))
-        {
-            printf("That username is reserved.\n");
-            continue;
-        }
-
-        if (validate_username(l.username))
-        {
-            break;
-        }
-
-        printf("Invalid username. Please use only alphanumeric characters and underscores.\n");
-    }
-
-    /* Read the password normally; input is visible while the user types. */
-    input_result = read_field("\tPassword: ", l.password, sizeof l.password);
-    if (input_result < 0)
-    {
-        fprintf(stderr, "Error reading password.\n");
-        return EXIT_FAILURE;
-    }
-    if (input_result == 0)
-    {
-        fprintf(stderr, "Password is too long.\n");
-        return EXIT_FAILURE;
-    }
-    if (l.password[0] == '\0' ||
-        strchr(l.password, ',') != NULL ||
-        isspace((unsigned char)l.password[0]) ||
-        isspace((unsigned char)l.password[strlen(l.password) - 1]))
-    {
-        fprintf(stderr, "Password must be nonempty and cannot contain commas or surrounding whitespace.\n");
-        return EXIT_FAILURE;
-    }
-
-    /* Accept only NIC values containing between 1 and 13 digits. */
-    do
-    {
-        input_result = read_field("\tNIC (up to 13 digits): ",
-                                  l.nic, sizeof l.nic);
-        if (input_result < 0)
-        {
-            return EXIT_FAILURE;
-        }
-        if (input_result == 0)
-        {
-            printf("NIC input is too long.\n");
-            continue;
-        }
-
-        if (!validate_nic(l.nic))
-        {
-            printf("Invalid NIC. Enter 1 to 13 digits.\n");
-        }
-    } while (!validate_nic(l.nic));
-
-    /* Open the data file only after all interactive input has been collected. */
     log = open_credentials_file_for_append();
     if (log == NULL)
     {
         fprintf(stderr, "Error opening credentials file.\n");
         return EXIT_FAILURE;
     }
+
+    printf(GREEN"╔══════════════════════════════════════════════════════════════════╗\n");
+    printf("║                         Let's Create New Account                      ║\n");
+    printf("╚══════════════════════════════════════════════════════════════════╝\n"RESET);
+    printf("\n");
+
+    printf(GREEN"Please enter your details here\n");
+
+    /* Keep prompting until the username contains only letters, digits, or underscores. */
+    while (1)
+    {
+        input_result = read_field(GREEN"\tUsername: ", l.username, sizeof l.username);
+        if (input_result < 0)
+        {
+            fclose(log);
+            return EXIT_FAILURE;
+        }
+
+        if (input_result == 0)
+        {
+            printf(GREEN"Username is too long.\n");
+            continue;
+        }
+
+        if (admin_is_reserved_username(l.username))
+        {
+            printf(BLUE"That username is reserved.\n");
+            continue;
+        }
+
+        if (validate_username(l.username))
+            break;
+
+        printf(RED"Invalid username. Please use only alphanumeric characters and underscores.\n");
+    }
+
+    /* Read the password normally; input is visible while the user types. */
+    input_result = read_field(GREEN"\tPassword: ", l.password, sizeof l.password);
+    if (input_result < 0)
+    {
+        fprintf(stderr, RED"Error reading password.\n");
+        fclose(log);
+        return EXIT_FAILURE;
+    }
+    if (input_result == 0)
+    {
+        fprintf(stderr, RED"Password is too long.\n");
+        fclose(log);
+        return EXIT_FAILURE;
+    }
+    if (l.password[0] == '\0' || strchr(l.password, ',') != NULL || isspace((unsigned char)l.password[0]) || isspace((unsigned char)l.password[strlen(l.password) - 1]))
+    {
+        fprintf(stderr, BLUE"Password must be nonempty and cannot contain commas or surrounding whitespace.\n");
+        fclose(log);
+        return EXIT_FAILURE;
+    }
+
+    /* Accept only NIC values containing between 1 and 13 digits. */
+    do
+    {
+        input_result = read_field(GREEN"\tNIC (up to 13 digits): ",l.nic, sizeof l.nic);
+        if (input_result < 0)
+        {
+            fclose(log);
+            return EXIT_FAILURE;
+        }
+        if (input_result == 0)
+        {
+            printf(BLUE"NIC input is too long.\n");
+            continue;
+        }
+
+        if (!validate_nic(l.nic))
+        {
+            printf(RED"Invalid NIC. Enter 1 to 13 digits.\n");
+        }
+    } while (!validate_nic(l.nic));
 
     /* Append the collected values as a CSV row. */
     if (fprintf(log, "%s, %s, %s\n", l.nic, l.username, l.password) < 0)
@@ -197,7 +210,6 @@ bool validate_username(const char *username)
             return false;
         }
     }
-
     return true;
 }
 
@@ -218,6 +230,5 @@ bool validate_nic(const char *nic)
             return false;
         }
     }
-
     return true;
 }

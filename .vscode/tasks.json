@@ -16,6 +16,12 @@
                 "${workspaceFolder}\\src\\reg.c",
                 "${workspaceFolder}\\src\\login.c",
                 "${workspaceFolder}\\src\\admin_auth.c",
+                "${workspaceFolder}\\src\\admin_portal.c",
+                "${workspaceFolder}\\src\\clearscreen.c",
+                "${workspaceFolder}\\src\\buyfoods.c",
+                "${workspaceFolder}\\src\\feedback.c",
+                "${workspaceFolder}\\src\\showprimary.c",
+                "${workspaceFolder}\\src\\studentoption.c",
                 "-o",
                 "${workspaceFolder}\\cms.exe"
             ],

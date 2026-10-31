@@ -2,11 +2,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../lib/admin_auth.h"
+#include "../lib/clearscreen.h"
+#include "../lib/admin_portal.h"
+#include "../lib/studentoption.h"
 
 #define USERNAME_SIZE 50
 #define PASSWORD_SIZE 30
 #define NIC_SIZE 14
 #define CREDENTIALS_LINE_SIZE 1024
+
+// ANSI Color code define
+
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define DGREEN "\033[38;5;22m"
+#define LGREEN "\033[92m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define BOLD    "\033[1m"
+#define RESET   "\033[0m"
 
 enum line_result
 {
@@ -106,7 +120,9 @@ static int copy_trimmed_field(const char *start, size_t length,
 }
 
 /* Parse exactly three unquoted, comma-separated fields: NIC, username, password. */
-static int parse_credentials_row(const char *line, char *nic, size_t nic_capacity,char *username, size_t username_capacity,char *password, size_t password_capacity)
+static int parse_credentials_row(const char *line, char *nic, size_t nic_capacity,
+                                 char *username, size_t username_capacity,
+                                 char *password, size_t password_capacity)
 {
     const char *first_comma = strchr(line, ',');
     const char *second_comma;
@@ -129,7 +145,13 @@ static int parse_credentials_row(const char *line, char *nic, size_t nic_capacit
         return 0;
     }
 
-    return copy_trimmed_field(line, (size_t)(first_comma - line),nic, nic_capacity) && copy_trimmed_field(first_comma + 1,(size_t)(second_comma - first_comma - 1),username, username_capacity) && copy_trimmed_field(second_comma + 1, strlen(second_comma + 1), password, password_capacity);
+    return copy_trimmed_field(line, (size_t)(first_comma - line),
+                              nic, nic_capacity) &&
+           copy_trimmed_field(first_comma + 1,
+                              (size_t)(second_comma - first_comma - 1),
+                              username, username_capacity) &&
+           copy_trimmed_field(second_comma + 1, strlen(second_comma + 1),
+                              password, password_capacity);
 }
 
 /* Compare ASCII text without regard to case; intended for usernames. */
@@ -213,8 +235,7 @@ static int initialize_admin_file(const char **admin_path)
     return admin_initialize(*admin_path);
 }
 
-
-int login()
+int login(void)
 {
     FILE *file;
     const char *credentials_path;
@@ -228,43 +249,51 @@ int login()
     char *trimmed_username;
     int result;
 
-    printf("Enter your username: ");
+    printf(GREEN"╔══════════════════════════════════════════════════════════════════╗\n");
+    printf("║                             LOGIN PAGE                           ║\n");
+    printf("╚══════════════════════════════════════════════════════════════════╝\n"RESET);
+    printf("\n");
+
+    printf(GREEN"Enter your username: ");
     result = read_line(stdin, username, sizeof(username));
     if (result != LINE_OK)
     {
-        fprintf(stderr, "Username input was missing, too long, or could not be read.\n");
+        fprintf(stderr, RED"Username input was missing, too long, or could not be read.\n");
         return EXIT_FAILURE;
     }
     trimmed_username = trim_whitespace(username);
 
-    printf("Enter your password: ");
+    printf(GREEN"Enter your password: ");
     result = read_line(stdin, password, sizeof(password));
     if (result != LINE_OK)
     {
-        fprintf(stderr, "Password input was missing, too long, or could not be read.\n");
+        fprintf(stderr, RED"Password input was missing, too long, or could not be read.\n");
+        return EXIT_FAILURE;
+    }
+
+    /* Authenticate the reserved admin before opening the regular-user file. */
+    if (!initialize_admin_file(&admin_path))
+    {
+        fprintf(stderr, RED"Could not create or read %s\n", admin_path);
         return EXIT_FAILURE;
     }
 
     if (admin_is_reserved_username(trimmed_username))
     {
-        /* Regular-user logins do not need to touch the admin credentials file. */
-        if (!initialize_admin_file(&admin_path))
-        {
-            fprintf(stderr, "Could not create or read %s\n", admin_path);
-            return EXIT_FAILURE;
-        }
-
-        enum admin_login_result admin_result = admin_login(admin_path, trimmed_username, password);
+        enum admin_login_result admin_result =
+            admin_login(admin_path, trimmed_username, password);
 
         if (admin_result == ADMIN_LOGIN_SUCCESS)
         {
-            printf("Admin login successful!\n");
+            printf(GREEN"Admin login successful!\n");
+            clearScreen();
+            admin_portal();
             return EXIT_SUCCESS;
         }
 
         if (admin_result == ADMIN_LOGIN_INVALID)
         {
-            printf("Invalid username or password.\n");
+            printf(RED"Invalid username or password.\n");
         }
         return EXIT_FAILURE;
     }
@@ -272,7 +301,7 @@ int login()
     file = open_credentials_file(&credentials_path);
     if (file == NULL)
     {
-        fprintf(stderr, "Could not open credentials file: %s\n", credentials_path);
+        fprintf(stderr, RED"Could not open credentials file: %s\n", credentials_path);
         return EXIT_FAILURE;
     }
 
@@ -286,33 +315,31 @@ int login()
         }
         if (result == LINE_ERROR)
         {
-            fprintf(stderr, "Error reading credentials file: %s\n", credentials_path);
+            fprintf(stderr, RED"Error reading credentials file: %s\n", credentials_path);
             fclose(file);
             return EXIT_FAILURE;
         }
         if (result == LINE_TOO_LONG)
         {
-            fprintf(stderr, "Skipping an overlong credentials row.\n");
+            fprintf(stderr, RED"Skipping an overlong credentials row.\n");
             continue;
         }
 
-        if (!parse_credentials_row(line, saved_nic, sizeof(saved_nic),
-                                   saved_username, sizeof(saved_username),
-                                   saved_password, sizeof(saved_password)))
+        if (!parse_credentials_row(line, saved_nic, sizeof(saved_nic), saved_username, sizeof(saved_username),saved_password, sizeof(saved_password)))
         {
             continue;
         }
 
-        if (compare_ignore_case(trimmed_username, saved_username) == 0 &&
-            strcmp(password, saved_password) == 0)
+        if (compare_ignore_case(trimmed_username, saved_username) == 0 && strcmp(password, saved_password) == 0)
         {
-            printf("Login successful!\n");
+            printf(GREEN"Login successful!\n");
             fclose(file);
+            clearScreen();
+            studentOption();
             return EXIT_SUCCESS;
         }
     }
-
-    printf("Invalid username or password. Please try again.\n");
+    printf(RED"Invalid username or password. Please try again.\n");
     fclose(file);
     return EXIT_FAILURE;
 }
