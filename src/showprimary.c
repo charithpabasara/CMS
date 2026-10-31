@@ -33,7 +33,8 @@ static void displayMenu(FoodItem items[], int count);
 
 int showPrimary()
 {
-    const char *files[4] = {"../data/menu/meals.csv", "../data/menu/snacks.csv","../data/menu/beverages.csv", "../data/menu/desserts.csv"};
+    const char *files[4] = {"data/menu/meals.csv", "data/menu/snacks.csv",
+                            "data/menu/beverages.csv", "data/menu/desserts.csv"};
     int choice;
 
     while (1) {

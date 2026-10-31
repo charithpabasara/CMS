@@ -51,7 +51,7 @@ static int parse_int(const char *text, int *value)
 
 static FILE *open_feedback_file(void)
 {
-    FILE *fp = fopen("../data/feedback.csv", "a");
+    FILE *fp = fopen("data/feedback.csv", "a");
     if (fp == NULL)
     {
         fp = fopen("../data/feedback.csv", "a");
@@ -61,7 +61,7 @@ static FILE *open_feedback_file(void)
 
 static FILE *open_feedback_file_for_read(void)
 {
-    FILE *fp = fopen("../data/feedback.csv", "r");
+    FILE *fp = fopen("data/feedback.csv", "r");
     if (fp == NULL)
     {
         fp = fopen("../data/feedback.csv", "r");
@@ -71,13 +71,15 @@ static FILE *open_feedback_file_for_read(void)
 
 static int parse_feedback_record(const char *line, struct Feedback *feedback)
 {
-    char comment[sizeof(feedback->comment)];
+    int comment_start = -1;
+    size_t comment_length;
 
-    if (sscanf(line, "%d, %d, %d, %499[^\n]",
+    if (sscanf(line, "%d, %d, %d,%n",
                &feedback->orderId,
                &feedback->foodRating,
                &feedback->serviceRating,
-               comment) != 4 ||
+               &comment_start) != 3 ||
+        comment_start < 0 ||
         feedback->orderId <= 0 ||
         feedback->foodRating < 1 || feedback->foodRating > 5 ||
         feedback->serviceRating < 1 || feedback->serviceRating > 5)
@@ -85,7 +87,17 @@ static int parse_feedback_record(const char *line, struct Feedback *feedback)
         return 0;
     }
 
-    snprintf(feedback->comment, sizeof feedback->comment, "%s", comment);
+    if (line[comment_start] == ' ')
+    {
+        comment_start++;
+    }
+    comment_length = strcspn(line + comment_start, "\r\n");
+    if (comment_length >= sizeof feedback->comment)
+    {
+        return 0;
+    }
+    memcpy(feedback->comment, line + comment_start, comment_length);
+    feedback->comment[comment_length] = '\0';
     return 1;
 }
 
