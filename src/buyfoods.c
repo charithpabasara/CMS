@@ -353,7 +353,7 @@ static int saveMenusTransactionally(const char *const files[],
 }
 
 static int appendOrderReport(CartItem cart[], int cartCount) {
-    FILE *report = fopen("data/reportdata.csv", "a");
+    FILE *report = fopen("../data/reportdata.csv", "a");
     int ok = 1;
 
     if (report == NULL) {
