@@ -37,7 +37,7 @@ void mainOptions();
 
 
 
-int main()
+int homemain()
 {
 
   system("mode con: cols=100 lines=35");          // Resize windows terminal
@@ -266,10 +266,7 @@ void mainOptions()
   }
 
   clearScreen();								// Clear screen
-
-
-
-
+ 
   switch(role)
   {
     case 1:
