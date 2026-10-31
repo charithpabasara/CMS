@@ -59,10 +59,10 @@ static void printReceipt(CartItem cart[], int cartCount);
 // main calls all functions
 int buyFoods() {
     const char *files[4] = {
-        "data/menu/meals.csv",
-        "data/menu/snacks.csv",
-        "data/menu/beverages.csv",
-        "data/menu/desserts.csv"
+        "../data/menu/meals.csv",
+        "../data/menu/snacks.csv",
+        "../data/menu/beverages.csv",
+        "../data/menu/desserts.csv"
     };
     int choice;
     CartItem cart[200];
@@ -353,7 +353,7 @@ static int saveMenusTransactionally(const char *const files[],
 }
 
 static int appendOrderReport(CartItem cart[], int cartCount) {
-    FILE *report = fopen("data/reportdata.csv", "a");
+    FILE *report = fopen("../data/reportdata.csv", "a");
     int ok = 1;
 
     if (report == NULL) {
