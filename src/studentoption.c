@@ -74,7 +74,7 @@ void studentOption(void)
         printf("║            " YELLOW "(1) Watch Inventory" RESET "                                   ║\n");
         printf("║            " YELLOW "(2) Buy Foods" RESET "                                         ║\n");
         printf("║            " YELLOW "(3) Give Feedback or Complain" RESET "                         ║\n");
-        printf("║            " YELLOW "(4) More Options (under development)" RESET "                  ║\n");
+        printf("║            " YELLOW "(4) Exit" RESET "                                              ║\n");
         printf("╚══════════════════════════════════════════════════════════════════╝\n" RESET);
 
         if (!read_integer("Enter option number: ", 1, 4, &option))
@@ -87,12 +87,11 @@ void studentOption(void)
             case 1:
                 clearScreen();
                 showPrimary();
-                if (!read_integer("To return, enter 1: ", 1, 1, &back))
+               /* if (!read_integer("To return, enter 1: ", 1, 1, &back))
                 {
                     return;
-                }
+                }*/
                 break;
-
             case 2:
                 buyFoods();
                 break;
@@ -102,7 +101,11 @@ void studentOption(void)
                 break;
 
             case 4:
-                printf("Under development.\n");
+                printf("Exiting\n");
+                exit(1);
+
+            default:
+                printf("Invalid choice");
                 break;
         }
     }
