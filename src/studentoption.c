@@ -70,12 +70,12 @@ void studentOption(void)
     {
         clearScreen();
         printf(GREEN "╔══════════════════════════════════════════════════════════════════╗\n"RESET);
-        printf(GREEN"║            "YELLOW"HELLO THERE, WHAT'S TODAY!"RESET"                            ║\n"RESET);
+        printf(GREEN"║            "YELLOW"HELLO THERE, WHAT'S TODAY!"RESET GREEN"                            ║\n"RESET);
         printf(GREEN"╠══════════════════════════════════════════════════════════════════╣\n"RESET);
-        printf(GREEN"║            " YELLOW "(1) Watch Inventory" RESET "                                   ║\n"RESET);
-        printf(GREEN"║            " YELLOW "(2) Buy Foods" RESET "                                         ║\n"RESET);
-        printf(GREEN"║            " YELLOW "(3) Give Feedback or Complain" RESET "                         ║\n"RESET);
-        printf(GREEN"║            " YELLOW "(4) Go Back (Login Menu)" RESET "                              ║\n"RESET);
+        printf(GREEN"║            " YELLOW "(1) Watch Inventory" RESET GREEN"                                   ║\n"RESET);
+        printf(GREEN"║            " YELLOW "(2) Buy Foods" RESET GREEN"                                         ║\n"RESET);
+        printf(GREEN"║            " YELLOW "(3) Give Feedback or Complain" RESET GREEN"                         ║\n"RESET);
+        printf(GREEN"║            " YELLOW "(4) Go Back (Login Menu)" RESET GREEN"                              ║\n"RESET);
         printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n" RESET);
 
         if (!read_integer(GREEN"Enter option number: "RESET, 1, 4, &option))

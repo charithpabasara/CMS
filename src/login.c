@@ -250,7 +250,7 @@ int login(void)
     int result;
 
     printf(GREEN"╔══════════════════════════════════════════════════════════════════╗\n");
-    printf(GREEN"║                             "YELLOW"LOGIN PAGE"RESET"                           ║\n"RESET);
+    printf(GREEN"║                             "YELLOW"LOGIN PAGE"RESET GREEN"                           ║\n"RESET);
     printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n"RESET);
     printf("\n");
 
