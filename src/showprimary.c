@@ -52,7 +52,7 @@ int showPrimary()
         printf("\n");
 
 
-        printf(GREEN"### Choose an option: "RESET);
+        printf(GREEN"Choose an option: "RESET);
         if (scanf("%d", &choice) != 1) {
             scanf("%*[^\n]"); scanf("%*c");
             printf("Invalid input.\n");

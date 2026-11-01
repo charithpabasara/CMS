@@ -440,10 +440,10 @@ int addToCart(const char *filename, CartItem cart[], int *cartCount) {
             break; // Valid ID, exit the loop
         }
         
-        printf("Invalid ID range (100-500). Try again: ");
+        printf(RED"Invalid ID range (100-500). Try again: "RESET);
     }
 
-    printf("Enter quantity: ");
+    printf(GREEN"Enter quantity: "RESET);
     if (scanf("%d", &qty) != 1) {
         scanf("%*[^\n]"); scanf("%*c");
         printf("Invalid input.\n");
@@ -510,7 +510,7 @@ int addToCart(const char *filename, CartItem cart[], int *cartCount) {
         }
     }
     if (!found) {
-        printf("Item ID not found in this menu.\n");
+        printf(RED"Item ID not found in this menu.\n"RESET);
     }
     return 1;
 }
@@ -561,7 +561,7 @@ int confirmOrder(CartItem cart[], int cartCount, FoodItem items[][200], int coun
             }
         }
         if (!found) {
-            printf("Item ID %d not found in any menu files. Order not confirmed.\n", cart[ci].id);
+            printf(RED"Item ID %d not found in any menu files. Order not confirmed.\n"RESET, cart[ci].id);
             return 0;
         }
     }

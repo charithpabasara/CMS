@@ -1,10 +1,11 @@
-#include "../lib/html2pdf.h"
 #include "../lib/reports.h"
+#include "../lib/html2pdf.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 
 #ifdef _WIN32
 #include <windows.h>
@@ -13,22 +14,34 @@
 #define MAX_LINE 256
 
 void accessreport( int o);
+
+
+#define MAX_LINE 256
+
+// ANSI Color code define
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define DGREEN "\033[38;5;22m"
+#define LGREEN "\033[92m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define BOLD    "\033[1m"
+#define RESET   "\033[0m"
+
+void accessreport(int o);
+
 void newreport();
 int barrpt(int len, int ht, int br[][2]);
 void export();
 int Yn();
 
 typedef struct{
-
     int id;
     char name[50];
     int q;
     float price;
     float rev;
-
 } fStock;
-
-
 
 int reports() {
 
@@ -39,21 +52,26 @@ int reports() {
 #endif
 
 
+
 #ifdef _WIN32
 SetConsoleOutputCP(CP_UTF8);
 #endif
 
-    int i = 0,a;
+    int i = 0, a;
 
-    printf("\n\n┌───────────────────────────────────────────┐\n│               Sales Reports               │\n└───────────────────────────────────────────┘");
 
-    printf("\n\n\n> 1 View Last Report.\n> 2 Create New Report.\n");
+    printf(GREEN"╔══════════════════════════════════════════════════════════════════╗\n");
+    printf(GREEN"║                            "YELLOW"SALES REPORT"RESET"                          ║\n"RESET);
+    printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n"RESET);
+    printf("\n");
+    
+    printf(GREEN"\n\n\n> 1 View Last Report.\n> 2 Create New Report.\n"RESET);
 
     while (1){
 
         if(i == 0){
 
-            printf("\nEnter the choice : ");
+            printf(GREEN"\nEnter the choice : "RESET);
             scanf("%d",&i);
 
         }
@@ -89,13 +107,13 @@ SetConsoleOutputCP(CP_UTF8);
 
     
 
-    printf("Do you want to export the report?\n [Y/n] : ");
+    /* printf(YELLOW"Do you want to export the report?\n [Y/n] : "RESET);
 
     // calling Yn for validating the answer and after validation it calls for export
     
-    if ( (a = Yn()) == 1) export(); 
+    if ( (a = Yn()) == 1) export(); */
 
-    printf("Do you want to return to reports?\n [Y/n] : ");
+    printf(YELLOW"Do you want to return to reports?\n [Y/n] : "RESET);
 
     if ( (a = Yn()) == 1) reports();   
 
@@ -141,7 +159,7 @@ void accessreport(int o){
 
     //displaying the created report on screen
 
-    printf("┌─────────────────────────────────────────────────────────────────────────────────────────────┐\n");
+    printf(GREEN"┌─────────────────────────────────────────────────────────────────────────────────────────────┐\n");
     printf("│                                       Sales Report                                          │\n");
     printf("├─────────────────────────────────────────────────────────────────────────────────────────────┤\n");
     printf("│     %-16s%-18s%-10s%-17s%-13s%s       │\n","ID","Name","Price","Remains","Sold","Revenue");
@@ -154,8 +172,8 @@ void accessreport(int o){
 
             if(p.q > len) len = p.q;
 
-            printf("│    %-8.4d %-25s %-12.2f %-14d %-8d│   %-14.2f│\n",p.id,p.name,p.price,rem,p.q,p.rev);
-            printf("├───────────────────────────────────────────────────────────────────────────┼─────────────────┤\n");
+            printf(GREEN"│    %-8.4d %-25s %-12.2f %-14d %-8d│   %-14.2f│\n",p.id,p.name,p.price,rem,p.q,p.rev);
+            printf("├───────────────────────────────────────────────────────────────────────────┼─────────────────┤\n"RESET);
 
             tot += p.rev;
             br[ht] [1] = p.q;
@@ -169,8 +187,8 @@ void accessreport(int o){
     }
 
     
-    printf("│                                                                   Total   │   %-14.2f│\n",tot);
-    printf("└───────────────────────────────────────────────────────────────────────────┴─────────────────┘\n");
+    printf(GREEN"│                                                                   Total   │   %-14.2f│\n",tot);
+    printf("└───────────────────────────────────────────────────────────────────────────┴─────────────────┘\n"RESET);
 
     //call for drawing the simple bar chart
 
@@ -335,9 +353,8 @@ void export(){
             "../data/reports/visual_report.pdf") != 0) {
         fprintf(stderr, "PDF conversion failed\n");
         
-    }
-    
 
+    }
 }
 
 int Yn(){

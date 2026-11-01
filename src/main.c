@@ -62,23 +62,23 @@ int main()
        printf(" ┌──────────────────────────────────────────────────────────────┐ \n");
        printf(" │ "YELLOW"Help - Press 3 or Ctrl+C to close"RESET"                            │ \n");
        printf(" ├──────────────────────────────────────────────────────────────┤ \n");
-       printf(" │                  "YELLOW" ██████╗███╗   ███╗███████╗"RESET"                 │ \n");
-       printf(" │                 "YELLOW" ██╔════╝████╗ ████║██╔════╝"RESET"                 │ \n");
-       printf(" │                 "YELLOW" ██║     ██╔████╔██║███████║"RESET"                 │ \n");
-       printf(" │                 "YELLOW" ██║     ██║╚██╔╝██║╚════██║"RESET"                 │ \n");
-       printf(" │                 "YELLOW" ╚██████╗██║ ╚═╝ ██║███████║"RESET"                 │ \n");
-       printf(" │                  "YELLOW" ╚═════╝╚═╝     ╚═╝╚══════╝"RESET"                 │ \n");
+       printf(" │                  "GREEN" ██████╗███╗   ███╗███████╗"RESET"                 │ \n");
+       printf(" │                 "GREEN" ██╔════╝████╗ ████║██╔════╝"RESET"                 │ \n");
+       printf(" │                 "GREEN" ██║     ██╔████╔██║███████║"RESET"                 │ \n");
+       printf(" │                 "GREEN" ██║     ██║╚██╔╝██║╚════██║"RESET"                 │ \n");
+       printf(" │                 "GREEN" ╚██████╗██║ ╚═╝ ██║███████║"RESET"                 │ \n");
+       printf(" │                  "GREEN" ╚═════╝╚═╝     ╚═╝╚══════╝"RESET"                 │ \n");
        printf(" │                                                              │ \n");
-       printf(" │        A Terminal Canteen Manage System v1.0      "YELLOW"2026-2027"RESET"  │ \n");
+       printf(" │        "GREEN"A Terminal Canteen Manage System v1.0"RESET"      "YELLOW"2026-2027"RESET"  │ \n");
        printf(" │                                                              │ \n");
        printf(" └──────────────────────────────────────────────────────────────┘ \n");
        printf("\n");
 
-        printf("\tPlease select an option:\n");
-        printf("\t 1. Register\n");
+        printf(YELLOW"\tPlease select an option:\n");
+        printf(GREEN"\t 1. Register\n");
         printf("\t 2. Login\n");
-        printf("\t 3. Exit\n");
-        printf("\tEnter your choice: ");
+        printf("\t 3. Exit\n"RESET);
+        printf("\tEnter your choice: "RESET);
 
         if (fgets(input, sizeof input, stdin) == NULL)
         {

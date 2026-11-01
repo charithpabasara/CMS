@@ -84,8 +84,9 @@ which that path reaches the project data directory.
 
 The opening menu provides:
 
-1. **Register** — create a regular user with a username, password, and NIC
-   containing 1–13 digits.
+1. **Register** — create a regular user with a username of at least 7
+   alphanumeric characters or underscores, a password, and a NIC containing
+   exactly 13 digits.
 2. **Login** — regular accounts open the student menu; the reserved `admin`
    username opens the administrator portal.
 3. **Exit** — close the application.
@@ -147,7 +148,7 @@ authentication code.
   terminal. Do not use real or reused passwords or publish account files.
 - Feedback order IDs are user-entered and are not validated against completed
   orders.
-- The registration flow does not currently reject duplicate usernames.
+- Registration rejects duplicate usernames (case-insensitively).
 - There is no database, online payment, remote access, or multi-user locking.
 - The configured build task currently omits required report modules; see
   [Build status](#build-status).

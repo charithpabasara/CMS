@@ -69,7 +69,7 @@ static FILE *open_credentials_file_for_append(void)
     const char *configured_path = getenv("CREDENTIALS_FILE");
     static const char *const fallback_paths[] = {
         "../data/credentials.csv",
-        "data/credentials.csv"
+        "../data/credentials.csv"
     };
     FILE *file;
     size_t i;
@@ -120,7 +120,7 @@ static int username_exists(const char *username)
     const char *configured_path = getenv("CREDENTIALS_FILE");
     static const char *const fallback_paths[] = {
         "../data/credentials.csv",
-        "data/credentials.csv"
+        "../data/credentials.csv"
     };
     FILE *file = NULL;
     char line[1024];

@@ -39,16 +39,16 @@ void admin_portal(void)
 
         clearScreen();
         printf(GREEN "╔══════════════════════════════════════════════════════════════════╗\n");
-        printf("║                         ADMIN PORTAL                             ║\n");
-        printf("╠══════════════════════════════════════════════════════════════════╣\n" RESET);
-        printf("1. View feedback\n");
-        printf("2. Calculate average ratings\n");
-        printf("3. View complaints\n");
-        printf("4. View inventory\n");
-        printf("5. View sales report\n");
-        printf("6. Create new sales report\n"); // Added option
-        printf("7. Exit to main menu\n");       // Shifted exit option
-        printf("\nSelect an option: ");
+        printf(GREEN"║                         "YELLOW"ADMIN PORTAL"RESET"                         "GREEN"    ║\n"RESET);
+        printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n" RESET);
+        printf(YELLOW"1. View feedback\n"RESET);
+        printf(YELLOW"2. Calculate average ratings\n"RESET);
+        printf(YELLOW"3. View complaints\n"RESET);
+        printf(YELLOW"4. View inventory\n"RESET);
+        printf(YELLOW"5. View sales report\n"RESET);
+        printf(YELLOW"6. Create new sales report\n"RESET); // Added option
+        printf(YELLOW"7. Exit to main menu\n"RESET);       // Shifted exit option
+        printf(GREEN"\nSelect an option: "RESET);
 
         if (fgets(input, sizeof(input), stdin) == NULL)
         {
@@ -96,7 +96,7 @@ void admin_portal(void)
                 break;
         }
 
-        printf("\nPress Enter to continue...");
+        printf(GREEN"\nPress Enter to continue..."RESET);
         if (fgets(input, sizeof(input), stdin) == NULL)
         {
             return;
