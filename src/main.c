@@ -21,37 +21,64 @@
 #define RESET   "\033[0m"
 
 
+
+
 void mainOptions();
-void clearScreen();
+void clearScreen(); 
+
+#ifdef _WIN32
+#include <windows.h>
+
+static void enable_terminal_output(void)
+{
+    SetConsoleOutputCP(CP_UTF8);
+
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode;
+
+    if (out != INVALID_HANDLE_VALUE && GetConsoleMode(out, &mode)) {
+        SetConsoleMode(out, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    }
+}
+#endif
+
 
 int main()
 {
+
+#ifdef _WIN32
+    enable_terminal_output();
+#endif
+
+
     clearScreen();
     int choice;
     char input[64];
+
+    
 
     while (1)
     {
        printf(" ┌──────────────────────────────────────────────────────────────┐ \n");
        printf(" │ "YELLOW"Help - Press 3 or Ctrl+C to close"RESET"                            │ \n");
        printf(" ├──────────────────────────────────────────────────────────────┤ \n");
-       printf(" │                  "GREEN" ██████╗███╗   ███╗███████╗"RESET"                 │ \n");
-       printf(" │                 "GREEN" ██╔════╝████╗ ████║██╔════╝"RESET"                 │ \n");
-       printf(" │                 "GREEN" ██║     ██╔████╔██║███████║"RESET"                 │ \n");
-       printf(" │                 "GREEN" ██║     ██║╚██╔╝██║╚════██║"RESET"                 │ \n");
-       printf(" │                 "GREEN" ╚██████╗██║ ╚═╝ ██║███████║"RESET"                 │ \n");
-       printf(" │                  "GREEN" ╚═════╝╚═╝     ╚═╝╚══════╝"RESET"                 │ \n");
+       printf(" │                  "YELLOW" ██████╗███╗   ███╗███████╗"RESET"                 │ \n");
+       printf(" │                 "YELLOW" ██╔════╝████╗ ████║██╔════╝"RESET"                 │ \n");
+       printf(" │                 "YELLOW" ██║     ██╔████╔██║███████║"RESET"                 │ \n");
+       printf(" │                 "YELLOW" ██║     ██║╚██╔╝██║╚════██║"RESET"                 │ \n");
+       printf(" │                 "YELLOW" ╚██████╗██║ ╚═╝ ██║███████║"RESET"                 │ \n");
+       printf(" │                  "YELLOW" ╚═════╝╚═╝     ╚═╝╚══════╝"RESET"                 │ \n");
        printf(" │                                                              │ \n");
-       printf(" │        "GREEN"A Terminal Canteen Manage System v1.0"RESET"      "YELLOW"2026-2027"RESET"  │ \n");
+       printf(" │        A Terminal Canteen Manage System v1.0      "YELLOW"2026-2027"RESET"  │ \n");
        printf(" │                                                              │ \n");
        printf(" └──────────────────────────────────────────────────────────────┘ \n");
        printf("\n");
 
-        printf(YELLOW"\tPlease select an option:\n");
-        printf(GREEN"\t 1. Register\n");
+        printf("\tPlease select an option:\n");
+        printf("\t 1. Register\n");
         printf("\t 2. Login\n");
-        printf("\t 3. Exit\n"RESET);
-        printf("\tEnter your choice: "RESET);
+        printf("\t 3. Exit\n");
+        printf("\tEnter your choice: ");
 
         if (fgets(input, sizeof input, stdin) == NULL)
         {

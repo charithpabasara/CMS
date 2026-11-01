@@ -1,21 +1,13 @@
+#include "../lib/html2pdf.h"
 #include "../lib/reports.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <windows.h>
 
 #define MAX_LINE 256
-
-// ANSI Color code define
-#define RED     "\033[31m"
-#define GREEN   "\033[32m"
-#define DGREEN "\033[38;5;22m"
-#define LGREEN "\033[92m"
-#define YELLOW  "\033[33m"
-#define BLUE    "\033[34m"
-#define BOLD    "\033[1m"
-#define RESET   "\033[0m"
 
 void accessreport();
 void newreport();
@@ -24,12 +16,16 @@ void export();
 int Yn();
 
 typedef struct{
+
     int id;
     char name[50];
     int q;
     float price;
     float rev;
+
 } fStock;
+
+
 
 int reports() {
 
@@ -39,20 +35,19 @@ int reports() {
     system("clear");
 #endif
 
-    int i = 0, a;
+    SetConsoleOutputCP(CP_UTF8);
 
-    printf(GREEN"╔══════════════════════════════════════════════════════════════════╗\n");
-    printf(GREEN"║                            "YELLOW"SALES REPORT"RESET"                          ║\n"RESET);
-    printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n"RESET);
-    printf("\n");
-    
-    printf(GREEN"\n\n\n> 1 View Last Report.\n> 2 Create New Report.\n"RESET);
+    int i = 0,a;
+
+    printf("\n\n┌───────────────────────────────────────────┐\n│               Sales Reports               │\n└───────────────────────────────────────────┘");
+
+    printf("\n\n\n> 1 View Last Report.\n> 2 Create New Report.\n");
 
     while (1){
 
         if(i == 0){
 
-            printf(GREEN"\nEnter the choice : "RESET);
+            printf("\nEnter the choice : ");
             scanf("%d",&i);
 
         }
@@ -88,13 +83,13 @@ int reports() {
 
     
 
-    /* printf(YELLOW"Do you want to export the report?\n [Y/n] : "RESET);
+    printf("Do you want to export the report?\n [Y/n] : ");
 
     // calling Yn for validating the answer and after validation it calls for export
     
-    if ( (a = Yn()) == 1) export(); */
+    if ( (a = Yn()) == 1) export(); 
 
-    printf(YELLOW"Do you want to return to reports?\n [Y/n] : "RESET);
+    printf("Do you want to return to reports?\n [Y/n] : ");
 
     if ( (a = Yn()) == 1) reports();   
 
@@ -140,7 +135,7 @@ void accessreport(){
 
     //displaying the created report on screen
 
-    printf(GREEN"┌─────────────────────────────────────────────────────────────────────────────────────────────┐\n");
+    printf("┌─────────────────────────────────────────────────────────────────────────────────────────────┐\n");
     printf("│                                       Sales Report                                          │\n");
     printf("├─────────────────────────────────────────────────────────────────────────────────────────────┤\n");
     printf("│     %-16s%-18s%-10s%-17s%-13s%s       │\n","ID","Name","Price","Remains","Sold","Revenue");
@@ -153,8 +148,8 @@ void accessreport(){
 
             if(p.q > len) len = p.q;
 
-            printf(GREEN"│    %-8.4d %-25s %-12.2f %-14d %-8d│   %-14.2f│\n",p.id,p.name,p.price,rem,p.q,p.rev);
-            printf("├───────────────────────────────────────────────────────────────────────────┼─────────────────┤\n"RESET);
+            printf("│    %-8.4d %-25s %-12.2f %-14d %-8d│   %-14.2f│\n",p.id,p.name,p.price,rem,p.q,p.rev);
+            printf("├───────────────────────────────────────────────────────────────────────────┼─────────────────┤\n");
 
             tot += p.rev;
             br[ht] [1] = p.q;
@@ -168,8 +163,8 @@ void accessreport(){
     }
 
     
-    printf(GREEN"│                                                                   Total   │   %-14.2f│\n",tot);
-    printf("└───────────────────────────────────────────────────────────────────────────┴─────────────────┘\n"RESET);
+    printf("│                                                                   Total   │   %-14.2f│\n",tot);
+    printf("└───────────────────────────────────────────────────────────────────────────┴─────────────────┘\n");
 
     //call for drawing the simple bar chart
 
@@ -320,12 +315,12 @@ void export(){
 
     // calls to headless chromium browser for genarating the pdf
     
-    /* if (html_to_pdf(
+    if (html_to_pdf(
             "../data/reports/report.html",
             "../data/reports/visual_report.pdf") != 0) {
         fprintf(stderr, "PDF conversion failed\n");
         
-    } */
+    }
     
 
 }
