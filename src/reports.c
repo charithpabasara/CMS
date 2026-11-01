@@ -116,9 +116,8 @@ void accessreport(){
 
     if (rpt == NULL){
 
-        printf("Error : File could not be opened!");
-        fclose(rpt);
-        exit(1);
+        perror("Could not open sales report");
+        return;
 
     }
 
@@ -172,6 +171,7 @@ void accessreport(){
     barrpt(len,ht,br);
 
     printf("\n\n");
+    fclose(rpt);
 
 }
 
@@ -186,19 +186,28 @@ void newreport(){
     fStock s;
     fStock i;
 
-    nrpt = fopen("../data/reports.csv", "w");
     sales = fopen("../data/sales.csv", "r");
+    if (sales == NULL)
+    {
+        perror("Could not open sales data");
+        return;
+    }
+
     rp = fopen("../data/reports/report.html", "w+");
+    if (rp == NULL)
+    {
+        perror("Could not create HTML report");
+        fclose(sales);
+        return;
+    }
 
-    if (sales == NULL || rp == NULL){
-
-        if (sales == NULL){
-            printf("Can not access Sales\n");
-            fclose(sales);
-            exit(1);
-        }
-        
-
+    nrpt = fopen("../data/reports.csv", "w");
+    if (nrpt == NULL)
+    {
+        perror("Could not create sales report");
+        fclose(sales);
+        fclose(rp);
+        return;
     }
 
     //creating the HTML for building the structure for Visual_report.pdf
@@ -281,7 +290,7 @@ int barrpt(int len, int ht, int br[][2]){
         printf("────");
 
     }
-
+    return 0;
 }
 
 void export(){

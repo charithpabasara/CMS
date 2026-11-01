@@ -126,34 +126,7 @@ void admin_portal(void)
                 showPrimary();
                 break;
             case 5:
-                {
-                    // View sales report using reports.csv
-                    FILE *file = fopen("../data/reports.csv", "r");
-                    char line[256];
-                    int found = 0;
-
-                    if (file == NULL)
-                    {
-                        printf(YELLOW "No sales report is available. Please create one first using option 6.\n" RESET);
-                        break;
-                    }
-
-                    printf("\n===== SALES REPORT =====\n");
-                    while (fgets(line, sizeof(line), file) != NULL)
-                    {
-                        fputs(line, stdout);
-                        found = 1;
-                    }
-                    if (ferror(file))
-                    {
-                        fprintf(stderr, RED "Error reading the sales report.\n" RESET);
-                    }
-                    else if (!found)
-                    {
-                        printf("No sales have been recorded.\n");
-                    }
-                    fclose(file);
-                }
+                viewSalesReport();
                 break;
             case 6:
                 newreport(); // Calls the report generation logic from reports.c[cite: 6]

@@ -67,7 +67,9 @@ static int read_field(const char *prompt, char *buffer, size_t capacity)
 static FILE *open_credentials_file_for_append(void)
 {
     const char *configured_path = getenv("CREDENTIALS_FILE");
-    static const char *const fallback_paths[] = {"../data/credentials.csv","../data/credentials.csv"
+    static const char *const fallback_paths[] = {
+        "../data/credentials.csv",
+        "data/credentials.csv"
     };
     FILE *file;
     size_t i;
@@ -86,6 +88,114 @@ static FILE *open_credentials_file_for_append(void)
         }
     }
     return NULL;
+}
+
+static int username_equals(const char *left, const char *right)
+{
+    while (*left != '\0' && *right != '\0')
+    {
+        unsigned char a = (unsigned char)*left++;
+        unsigned char b = (unsigned char)*right++;
+
+        if (a >= 'A' && a <= 'Z')
+        {
+            a = (unsigned char)(a + ('a' - 'A'));
+        }
+        if (b >= 'A' && b <= 'Z')
+        {
+            b = (unsigned char)(b + ('a' - 'A'));
+        }
+        if (a != b)
+        {
+            return 0;
+        }
+    }
+
+    return *left == '\0' && *right == '\0';
+}
+
+/* Return 1 if the username is already registered, 0 if not, or -1 on I/O error. */
+static int username_exists(const char *username)
+{
+    const char *configured_path = getenv("CREDENTIALS_FILE");
+    static const char *const fallback_paths[] = {
+        "../data/credentials.csv",
+        "data/credentials.csv"
+    };
+    FILE *file = NULL;
+    char line[1024];
+
+    if (configured_path != NULL && configured_path[0] != '\0')
+    {
+        file = fopen(configured_path, "r");
+    }
+    else
+    {
+        for (size_t i = 0; i < sizeof fallback_paths / sizeof fallback_paths[0]; i++)
+        {
+            file = fopen(fallback_paths[i], "r");
+            if (file != NULL)
+            {
+                break;
+            }
+        }
+    }
+
+    if (file == NULL)
+    {
+        return -1;
+    }
+
+    while (fgets(line, sizeof line, file) != NULL)
+    {
+        char *first_comma = strchr(line, ',');
+        char *second_comma;
+        char *start;
+        char *end;
+        char saved_username[sizeof(((user *)0)->username)];
+        size_t length;
+
+        if (first_comma == NULL)
+        {
+            continue;
+        }
+        second_comma = strchr(first_comma + 1, ',');
+        if (second_comma == NULL)
+        {
+            continue;
+        }
+
+        start = first_comma + 1;
+        end = second_comma;
+        while (start < end && isspace((unsigned char)*start))
+        {
+            start++;
+        }
+        while (end > start && isspace((unsigned char)end[-1]))
+        {
+            end--;
+        }
+
+        length = (size_t)(end - start);
+        if (length >= sizeof saved_username)
+        {
+            continue;
+        }
+        memcpy(saved_username, start, length);
+        saved_username[length] = '\0';
+        if (username_equals(username, saved_username))
+        {
+            fclose(file);
+            return 1;
+        }
+    }
+
+    if (ferror(file))
+    {
+        fclose(file);
+        return -1;
+    }
+    return fclose(file) == 0 ? 0 : -1;
 }
 
 int reg_user(void)
@@ -131,7 +241,21 @@ int reg_user(void)
         }
 
         if (validate_username(l.username))
+        {
+            int exists = username_exists(l.username);
+            if (exists < 0)
+            {
+                fprintf(stderr, RED"Could not check existing usernames.\n");
+                fclose(log);
+                return EXIT_FAILURE;
+            }
+            if (exists)
+            {
+                printf(RED"That username is already registered.\n");
+                continue;
+            }
             break;
+        }
 
         printf(RED"Invalid username. Please use only alphanumeric characters and underscores.\n");
     }

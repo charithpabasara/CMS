@@ -414,7 +414,12 @@ int html_to_pdf(const char *html_path, const char *pdf_path) {
         return -1;
     }
 
-    snprintf(pdf_arg, sizeof pdf_arg, "--print-to-pdf=%s", absolute_pdf);
+    int pdf_arg_length = snprintf(pdf_arg, sizeof pdf_arg,
+                                  "--print-to-pdf=%s", absolute_pdf);
+    if (pdf_arg_length < 0 || (size_t)pdf_arg_length >= sizeof pdf_arg) {
+        fprintf(stderr, "[html2pdf] ERROR: PDF output path is too long\n");
+        return -1;
+    }
 
 
     if (get_browser_path(browser, sizeof browser) != 0) {
