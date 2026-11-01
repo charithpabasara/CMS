@@ -54,7 +54,7 @@ static FILE *open_feedback_file(void)
     FILE *fp = fopen("../data/feedback.csv", "a");
     if (fp == NULL)
     {
-        fp = fopen("data/feedback.csv", "a");
+        fp = fopen("../data/feedback.csv", "a");
     }
     return fp;
 }
@@ -64,7 +64,7 @@ static FILE *open_feedback_file_for_read(void)
     FILE *fp = fopen("../data/feedback.csv", "r");
     if (fp == NULL)
     {
-        fp = fopen("data/feedback.csv", "r");
+        fp = fopen("../data/feedback.csv", "r");
     }
     return fp;
 }
@@ -109,12 +109,12 @@ void submitFeedback(void)
     int parsed_value;
 
     printf(GREEN "\n╔══════════════════════════════════════════════════════════════════╗\n");
-    printf("║                    WHAT WE NEED TO IMPROVE                       ║\n");
-    printf("╚══════════════════════════════════════════════════════════════════╝\n" RESET);
+    printf(GREEN"║                    "YELLOW"WHAT WE NEED TO IMPROVE"RESET"                       ║\n"RESET);
+    printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n" RESET);
 
     // 1. Enter Order ID (repeats until valid)
     while (1) {
-        printf(GREEN "### Enter Order ID: " RESET);
+        printf(GREEN "Enter Order ID: " RESET);
         
         if (fgets(input, sizeof(input), stdin) == NULL) {
             return;
@@ -130,7 +130,7 @@ void submitFeedback(void)
 
     // 2. Enter Food Rating (repeats until valid)
     while (1) {
-        printf(GREEN "### Enter Food Rating (1-5): " RESET);
+        printf(GREEN "Enter Food Rating (1-5): " RESET);
         
         if (fgets(input, sizeof(input), stdin) == NULL) {
             return;
@@ -147,7 +147,7 @@ void submitFeedback(void)
 
     // 3. Enter Service Rating (repeats until valid)
     while (1) {
-        printf(GREEN "### Enter Service Rating (1-5): " RESET);
+        printf(GREEN "Enter Service Rating (1-5): " RESET);
 
         if (fgets(input, sizeof(input), stdin) == NULL) {
             return;
@@ -164,7 +164,7 @@ void submitFeedback(void)
 
     // 4. Enter Comments (repeats until valid)
     while (1) {
-        printf(GREEN "### Enter your comments: " RESET);
+        printf(GREEN "Enter your comments: " RESET);
 
         if (fgets(f.comment, sizeof(f.comment), stdin) == NULL) {
             return;
