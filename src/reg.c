@@ -218,7 +218,7 @@ int reg_user(void)
 
     printf(GREEN"Please enter your details here\n");
 
-    /* Keep prompting until the username contains only letters, digits, or underscores. */
+    /* Keep prompting until the username has at least 7 allowed characters. */
     while (1)
     {
         input_result = read_field(GREEN"\tUsername: ", l.username, sizeof l.username);
@@ -257,7 +257,7 @@ int reg_user(void)
             break;
         }
 
-        printf(RED"Invalid username. Please use only alphanumeric characters and underscores.\n");
+        printf(RED"Invalid username. Use at least 7 alphanumeric characters or underscores.\n");
     }
 
     /* Read the password normally; input is visible while the user types. */
@@ -281,10 +281,10 @@ int reg_user(void)
         return EXIT_FAILURE;
     }
 
-    /* Accept only NIC values containing between 1 and 13 digits. */
+    /* Accept only NIC values containing exactly 13 digits. */
     do
     {
-        input_result = read_field(GREEN"\tNIC (up to 13 digits): ",l.nic, sizeof l.nic);
+        input_result = read_field(GREEN"\tNIC (exactly 13 digits): ",l.nic, sizeof l.nic);
         if (input_result < 0)
         {
             fclose(log);
@@ -298,7 +298,7 @@ int reg_user(void)
 
         if (!validate_nic(l.nic))
         {
-            printf(RED"Invalid NIC. Enter 1 to 13 digits.\n");
+            printf(RED"Invalid NIC. Enter exactly 13 digits.\n");
         }
     } while (!validate_nic(l.nic));
 
@@ -317,10 +317,10 @@ int reg_user(void)
     return EXIT_SUCCESS;
 }
 
-/* Return true when the username is nonempty and contains only allowed characters. */
+/* Return true when the username has at least 7 allowed characters. */
 bool validate_username(const char *username)
 {
-    if (username[0] == '\0')
+    if (strlen(username) < 7)
     {
         return false;
     }
@@ -335,12 +335,12 @@ bool validate_username(const char *username)
     return true;
 }
 
-/* Return true when the NIC contains between 1 and 13 decimal digits. */
+/* Return true when the NIC contains exactly 13 decimal digits. */
 bool validate_nic(const char *nic)
 {
     size_t length = strlen(nic);
 
-    if (length == 0 || length > 13)
+    if (length != 13)
     {
         return false;
     }
