@@ -1,3 +1,4 @@
+#include "../lib/html2pdf.h"
 #include "../lib/reports.h"
 #include "../lib/html2pdf.h"
 
@@ -5,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <windows.h>
 
 
 #ifdef _WIN32
@@ -36,12 +38,16 @@ void export();
 int Yn();
 
 typedef struct{
+
     int id;
     char name[50];
     int q;
     float price;
     float rev;
+
 } fStock;
+
+
 
 int reports() {
 
@@ -71,7 +77,7 @@ SetConsoleOutputCP(CP_UTF8);
 
         if(i == 0){
 
-            printf(GREEN"\nEnter the choice : "RESET);
+            printf("\nEnter the choice : ");
             scanf("%d",&i);
 
         }
@@ -107,13 +113,13 @@ SetConsoleOutputCP(CP_UTF8);
 
     
 
-    /* printf(YELLOW"Do you want to export the report?\n [Y/n] : "RESET);
+    printf("Do you want to export the report?\n [Y/n] : ");
 
     // calling Yn for validating the answer and after validation it calls for export
     
-    if ( (a = Yn()) == 1) export(); */
+    if ( (a = Yn()) == 1) export(); 
 
-    printf(YELLOW"Do you want to return to reports?\n [Y/n] : "RESET);
+    printf("Do you want to return to reports?\n [Y/n] : ");
 
     if ( (a = Yn()) == 1) reports();   
 
@@ -159,7 +165,7 @@ void accessreport(int o){
 
     //displaying the created report on screen
 
-    printf(GREEN"┌─────────────────────────────────────────────────────────────────────────────────────────────┐\n");
+    printf("┌─────────────────────────────────────────────────────────────────────────────────────────────┐\n");
     printf("│                                       Sales Report                                          │\n");
     printf("├─────────────────────────────────────────────────────────────────────────────────────────────┤\n");
     printf("│     %-16s%-18s%-10s%-17s%-13s%s       │\n","ID","Name","Price","Remains","Sold","Revenue");
@@ -172,8 +178,8 @@ void accessreport(int o){
 
             if(p.q > len) len = p.q;
 
-            printf(GREEN"│    %-8.4d %-25s %-12.2f %-14d %-8d│   %-14.2f│\n",p.id,p.name,p.price,rem,p.q,p.rev);
-            printf("├───────────────────────────────────────────────────────────────────────────┼─────────────────┤\n"RESET);
+            printf("│    %-8.4d %-25s %-12.2f %-14d %-8d│   %-14.2f│\n",p.id,p.name,p.price,rem,p.q,p.rev);
+            printf("├───────────────────────────────────────────────────────────────────────────┼─────────────────┤\n");
 
             tot += p.rev;
             br[ht] [1] = p.q;
@@ -187,8 +193,8 @@ void accessreport(int o){
     }
 
     
-    printf(GREEN"│                                                                   Total   │   %-14.2f│\n",tot);
-    printf("└───────────────────────────────────────────────────────────────────────────┴─────────────────┘\n"RESET);
+    printf("│                                                                   Total   │   %-14.2f│\n",tot);
+    printf("└───────────────────────────────────────────────────────────────────────────┴─────────────────┘\n");
 
     //call for drawing the simple bar chart
 
@@ -353,7 +359,6 @@ void export(){
             "../data/reports/visual_report.pdf") != 0) {
         fprintf(stderr, "PDF conversion failed\n");
         
-
     }
 }
 

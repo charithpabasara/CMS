@@ -9,7 +9,6 @@
 #include "../lib/feedback.h"
 #include "../lib/showprimary.h"
 #include "../lib/studentoption.h"
-#include "../lib/usr.h"
 
 #define RED "\033[31m"
 #define GREEN "\033[32m"
@@ -69,16 +68,19 @@ void studentOption(void)
     for (;;)
     {
         clearScreen();
-        printf(GREEN "╔══════════════════════════════════════════════════════════════════╗\n");
-        printf("║            HELLO THERE, WHAT'S TODAY!                            ║\n");
-        printf("╚══════════════════════════════════════════════════════════════════╝\n");
-        printf("║            " YELLOW "(1) Watch Inventory" RESET "                                   ║\n");
-        printf("║            " YELLOW "(2) Buy Foods" RESET "                                         ║\n");
-        printf("║            " YELLOW "(3) Give Feedback or Complain" RESET "                         ║\n");
-        printf("║            " YELLOW "(4) Go Back (Login Menu)" RESET "                              ║\n");
-        printf("╚══════════════════════════════════════════════════════════════════╝\n" RESET);
 
-        if (!read_integer(GREEN"Enter option number: "RESET, 1, 4, &option))
+        printf(GREEN "╔══════════════════════════════════════════════════════════════════╗\n"RESET);
+        printf(GREEN"║            "YELLOW"HELLO THERE, WHAT'S TODAY!"RESET"                            ║\n"RESET);
+        printf(GREEN"╠══════════════════════════════════════════════════════════════════╣\n"RESET);
+        printf(GREEN"║            " YELLOW "(1) Watch Inventory" RESET "                                   ║\n"RESET);
+        printf(GREEN"║            " YELLOW "(2) Buy Foods" RESET "                                         ║\n"RESET);
+        printf(GREEN"║            " YELLOW "(3) Give Feedback or Complain" RESET "                         ║\n"RESET);
+        printf(GREEN"║            " YELLOW "(4) Go Back (Login Menu)" RESET "                              ║\n"RESET);
+        printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n" RESET);
+
+
+
+        if (!read_integer("Enter option number: ", 1, 4, &option))
         {
             return;
         }
@@ -88,26 +90,25 @@ void studentOption(void)
             case 1:
                 clearScreen();
                 showPrimary();
-                if (!read_integer(YELLOW"To return, enter 1: "RESET, 1, 1, &back))
+               /* if (!read_integer("To return, enter 1: ", 1, 1, &back))
                 {
                     return;
-                }
+                }*/
                 break;
-
             case 2:
-                clearScreen();
                 buyFoods();
                 break;
 
             case 3:
-                clearScreen();
                 submitFeedback();
                 break;
 
             case 4:
-                clearScreen();
-                login();
-                clearScreen();
+                printf("Exiting\n");
+                exit(1);
+
+            default:
+                printf("Invalid choice");
                 break;
         }
     }
