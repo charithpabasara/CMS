@@ -274,9 +274,10 @@ int reg_user(void)
         fclose(log);
         return EXIT_FAILURE;
     }
-    if (l.password[0] == '\0' || strchr(l.password, ',') != NULL || isspace((unsigned char)l.password[0]) || isspace((unsigned char)l.password[strlen(l.password) - 1]))
+    if (l.password[0] == '\0' || strchr(l.password, ',') != NULL || isspace((unsigned char)l.password[0]) || isspace((unsigned char)l.password[strlen(l.password) - 1]) || strlen(l.password) < 7)
     {
         fprintf(stderr, BLUE"Password must be nonempty and cannot contain commas or surrounding whitespace.\n");
+        fprintf(stderr, BLUE"Password must be at least 7 characters long.\n");
         fclose(log);
         return EXIT_FAILURE;
     }
