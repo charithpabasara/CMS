@@ -87,10 +87,10 @@ void studentOption(void)
             case 1:
                 clearScreen();
                 showPrimary();
-               /* if (!read_integer("To return, enter 1: ", 1, 1, &back))
+                if (!read_integer("To return, enter 1: ", 1, 1, &back))
                 {
                     return;
-                }*/
+                }
                 break;
             case 2:
                 buyFoods();
