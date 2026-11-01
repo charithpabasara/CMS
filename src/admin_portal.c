@@ -18,55 +18,13 @@
 #define BOLD    "\033[1m"
 #define RESET   "\033[0m"
 
-void accessreport();
+void accessreport(int o);
 void newreport();
 
 static void viewSalesReport(void)
 {
-    FILE *file = fopen("../data/reports.csv", "r");
-    char line[256];
-    int found = 0;
-
-    if (file == NULL)
-    {
-        printf(YELLOW "No sales report is available. Please create one first using option 6.\n" RESET);
-        return;
-    }
-
-    printf("\n===== SALES REPORT =====\n");
-    
-    // Print table header
-    printf("┌──────────┬──────────────────────────┬───────────┬──────────┬──────┬─────────────┐\n");
-    printf("│ ID       │ Name                     │ Price     │ Remains  │ Sold │ Revenue     │\n");
-    printf("├──────────┼──────────────────────────┼───────────┼──────────┼──────┼─────────────┤\n");
-
-    int id, remains, qty;
-    char name[50];
-    float price, rev;
-
-    while (fgets(line, sizeof(line), file) != NULL)
-    {
-        // Parse fields matching the reports.csv format: id,name,price,remains,qty,rev
-        if (sscanf(line, "%d,%49[^,],%f,%d,%d,%f", &id, name, &price, &remains, &qty, &rev) == 6)
-        {
-            printf("│ %-8d │ %-24s │ %9.2f │ %8d │ %4d │ %11.2f │\n", 
-                    id, name, price, remains, qty, rev);
-            found = 1;
-        }
-    }
-
-    // Print table footer
-    printf("└──────────┴──────────────────────────┴───────────┴──────────┴──────┴─────────────┘\n");
-
-    if (ferror(file))
-    {
-        fprintf(stderr, RED "Error reading the sales report.\n" RESET);
-    }
-    else if (!found)
-    {
-        printf("No sales have been recorded.\n");
-    }
-    fclose(file);
+ 
+    accessreport(0);
 }
 
 void admin_portal(void)

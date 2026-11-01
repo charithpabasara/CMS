@@ -21,14 +21,41 @@
 #define RESET   "\033[0m"
 
 
+
+
 void mainOptions();
-void clearScreen();
+void clearScreen(); 
+
+#ifdef _WIN32
+#include <windows.h>
+
+static void enable_terminal_output(void)
+{
+    SetConsoleOutputCP(CP_UTF8);
+
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode;
+
+    if (out != INVALID_HANDLE_VALUE && GetConsoleMode(out, &mode)) {
+        SetConsoleMode(out, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    }
+}
+#endif
+
 
 int main()
 {
+
+#ifdef _WIN32
+    enable_terminal_output();
+#endif
+
+
     clearScreen();
     int choice;
     char input[64];
+
+    
 
     while (1)
     {

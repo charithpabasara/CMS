@@ -5,11 +5,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 #define MAX_LINE 256
 
-void accessreport();
+void accessreport( int o);
 void newreport();
 int barrpt(int len, int ht, int br[][2]);
 void export();
@@ -35,7 +38,10 @@ int reports() {
     system("clear");
 #endif
 
-    SetConsoleOutputCP(CP_UTF8);
+
+#ifdef _WIN32
+SetConsoleOutputCP(CP_UTF8);
+#endif
 
     int i = 0,a;
 
@@ -57,7 +63,7 @@ int reports() {
         if (i == 1){
 
             i = 0;
-            accessreport();
+            accessreport(1);
             break;
 
         }
@@ -96,7 +102,7 @@ int reports() {
     return 0;
 }
 
-void accessreport(){
+void accessreport(int o){
 
 #ifdef _WIN32
     system("cls");
@@ -108,7 +114,7 @@ void accessreport(){
     FILE *rpt;
     char buffer[MAX_LINE];
     fStock p;
-    int rem = 0, len = 3, ht = 0;
+    int rem = 0, len = 3, ht = 0, a = 1;
     float tot = 0;
     int br[50] [2];
 
@@ -172,6 +178,15 @@ void accessreport(){
 
     printf("\n\n");
     fclose(rpt);
+
+    if (o == 0){
+
+        printf("Do you want to export the report?\n [Y/n] : ");
+
+        // calling Yn for validating the answer and after validation it calls for export
+
+        if ( (a = Yn()) == 1) export(); 
+    }
 
 }
 
@@ -239,7 +254,7 @@ void newreport(){
 
 
     fclose(nrpt);
-    accessreport();
+    accessreport(0);
 
     printf("\n\n");
 

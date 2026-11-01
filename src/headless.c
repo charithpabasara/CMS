@@ -18,6 +18,8 @@
 #define SYSTEM(cmd) system(cmd)
 #else
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define MKDIR(p) mkdir((p), 0755)
 #define FILE_EXISTS(p) (access((p), F_OK) == 0)
@@ -256,7 +258,7 @@ static int download_and_install(char *out, size_t out_len) {
              "tar -xf \"%s\" -C \"%s\"", zip_path, CHS_INSTALL_DIR);
 #else
     snprintf(command, sizeof command,
-             "tar -xf '%s' -C '%s'", zip_path, CHS_INSTALL_DIR);
+             "unzip -q -o '%s' -d '%s'", zip_path, CHS_INSTALL_DIR);
 #endif
 
     if (SYSTEM(command) != 0) {
@@ -472,17 +474,40 @@ int html_to_pdf(const char *html_path, const char *pdf_path) {
         _close(saved_stderr);
     }
 #else
-    char command[8192];
+    int result = -1;
+    pid_t pid = fork();
 
-    snprintf(command, sizeof command,
-             "\"%s\" --headless --no-pdf-header-footer "
-             "--no-sandbox --disable-gpu --disable-logging "
-             "--log-level=3 --virtual-time-budget=5000 "
-             "\"%s\" \"%s\" >/dev/null 2>&1",
-             browser, pdf_arg, file_url);
+    if (pid == -1) {
+        perror("[html2pdf] fork");
+    } else if (pid == 0) {
+        char *args[] = {
+            browser,
+            "--headless",
+            "--no-pdf-header-footer",
+            "--no-sandbox",
+            "--disable-gpu",
+            "--disable-logging",
+            "--log-level=3",
+            "--virtual-time-budget=5000",
+            pdf_arg,
+            file_url,
+            NULL
+        };
 
-    int result = SYSTEM(command);
+        execv(browser, args);
+        perror("[html2pdf] execv");
+        _exit(127);
+    } else {
+        int status;
+
+        if (waitpid(pid, &status, 0) != -1 &&
+            WIFEXITED(status) &&
+            WEXITSTATUS(status) == 0) {
+            result = 0;
+        }
+    }
 #endif
+
 
     if (result != 0) {
         fprintf(stderr, "[html2pdf] ERROR: browser command failed\n");
