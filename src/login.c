@@ -188,7 +188,7 @@ static FILE *open_credentials_file(const char **opened_path)
 {
     const char *configured_path = getenv("CREDENTIALS_FILE");
     static const char *const fallback_paths[] = {
-        "data/credentials.csv",
+        "../data/credentials.csv",
         "../data/credentials.csv"
     };
     FILE *file;
@@ -225,7 +225,7 @@ static int initialize_admin_file(const char **admin_path)
         return admin_initialize(*admin_path);
     }
 
-    *admin_path = "data/admin.dat";
+    *admin_path = "../data/admin.dat";
     if (admin_initialize(*admin_path))
     {
         return 1;
@@ -250,8 +250,8 @@ int login(void)
     int result;
 
     printf(GREEN"╔══════════════════════════════════════════════════════════════════╗\n");
-    printf("║                             LOGIN PAGE                           ║\n");
-    printf("╚══════════════════════════════════════════════════════════════════╝\n"RESET);
+    printf(GREEN"║                             "YELLOW"LOGIN PAGE"RESET"                           ║\n"RESET);
+    printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n"RESET);
     printf("\n");
 
     printf(GREEN"Enter your username: ");
