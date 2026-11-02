@@ -1,5 +1,6 @@
 #include "../lib/html2pdf.h"
 #include "../lib/reports.h"
+#include "../lib/html2pdf.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -7,9 +8,30 @@
 #include <unistd.h>
 #include <windows.h>
 
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #define MAX_LINE 256
 
-void accessreport();
+void accessreport( int o);
+
+
+#define MAX_LINE 256
+
+// ANSI Color code define
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define DGREEN "\033[38;5;22m"
+#define LGREEN "\033[92m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define BOLD    "\033[1m"
+#define RESET   "\033[0m"
+
+void accessreport(int o);
+
 void newreport();
 int barrpt(int len, int ht, int br[][2]);
 void export();
@@ -35,13 +57,21 @@ int reports() {
     system("clear");
 #endif
 
-    SetConsoleOutputCP(CP_UTF8);
 
-    int i = 0,a;
 
-    printf("\n\n┌───────────────────────────────────────────┐\n│               Sales Reports               │\n└───────────────────────────────────────────┘");
+#ifdef _WIN32
+SetConsoleOutputCP(CP_UTF8);
+#endif
 
-    printf("\n\n\n> 1 View Last Report.\n> 2 Create New Report.\n");
+    int i = 0, a;
+
+
+    printf(GREEN"╔══════════════════════════════════════════════════════════════════╗\n");
+    printf(GREEN"║                            "YELLOW"SALES REPORT"RESET"                          ║\n"RESET);
+    printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n"RESET);
+    printf("\n");
+    
+    printf(GREEN"\n\n\n> 1 View Last Report.\n> 2 Create New Report.\n"RESET);
 
     while (1){
 
@@ -57,7 +87,7 @@ int reports() {
         if (i == 1){
 
             i = 0;
-            accessreport();
+            accessreport(1);
             break;
 
         }
@@ -96,7 +126,7 @@ int reports() {
     return 0;
 }
 
-void accessreport(){
+void accessreport(int o){
 
 #ifdef _WIN32
     system("cls");
@@ -108,7 +138,7 @@ void accessreport(){
     FILE *rpt;
     char buffer[MAX_LINE];
     fStock p;
-    int rem = 0, len = 3, ht = 0;
+    int rem = 0, len = 3, ht = 0, a = 1;
     float tot = 0;
     int br[50] [2];
 
@@ -172,6 +202,15 @@ void accessreport(){
 
     printf("\n\n");
     fclose(rpt);
+
+    if (o == 0){
+
+        printf("Do you want to export the report?\n [Y/n] : ");
+
+        // calling Yn for validating the answer and after validation it calls for export
+
+        if ( (a = Yn()) == 1) export(); 
+    }
 
 }
 
@@ -239,7 +278,7 @@ void newreport(){
 
 
     fclose(nrpt);
-    accessreport();
+    accessreport(0);
 
     printf("\n\n");
 
@@ -321,8 +360,6 @@ void export(){
         fprintf(stderr, "PDF conversion failed\n");
         
     }
-    
-
 }
 
 int Yn(){
