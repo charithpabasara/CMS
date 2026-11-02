@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <errno.h>
 
 #include "../lib/buyfoods.h"
 #include "../lib/clearscreen.h"
@@ -53,7 +54,10 @@ void studentOption();
 static int writeMenuFile(const char *filename, FoodItem items[], int count);
 static int saveMenusTransactionally(const char *const files[],
                                     FoodItem items[][200], const int counts[]);
-static int appendOrderReport(CartItem cart[], int cartCount);
+static int appendOrderReport(CartItem cart[], int cartCount,
+                             FoodItem items[][200], const int counts[]);
+static int updateSalesReport(CartItem cart[], int cartCount,
+                             FoodItem items[][200], const int counts[]);
 static void printReceipt(CartItem cart[], int cartCount);
 
 // main calls all functions
@@ -150,7 +154,7 @@ int buyFoods() {
                         confirmOrder(cart, cartCount, all, counts)) {
                         if (saveMenusTransactionally(files, all, counts)) {
                             printReceipt(cart, cartCount);
-                            if (!appendOrderReport(cart, cartCount)) {
+                            if (!appendOrderReport(cart, cartCount, all, counts)) {
                                 fprintf(stderr, RED
                                         "Order confirmed, but the sales report could not be saved.\n"
                                         RESET);
@@ -352,11 +356,155 @@ static int saveMenusTransactionally(const char *const files[],
     return 1;
 }
 
-static int appendOrderReport(CartItem cart[], int cartCount) {
-    FILE *report = fopen("../data/reportdata.csv", "a");
+static int updateSalesReport(CartItem cart[], int cartCount,
+                             FoodItem items[][200], const int counts[]) {
+    static const char categories[] = {'M', 'S', 'B', 'D'};
+    const char *sales_path = "../data/sales.csv";
+    const char *temporary_path = "../data/sales.csv.txn.tmp";
+    int updated[200] = {0};
+    FILE *source;
+    FILE *temporary;
+    char line[512];
     int ok = 1;
 
+    errno = 0;
+    source = fopen(sales_path, "r");
+    if (source == NULL && errno != ENOENT) {
+        return 0;
+    }
+
+    temporary = fopen(temporary_path, "w");
+    if (temporary == NULL) {
+        if (source != NULL) {
+            fclose(source);
+        }
+        return 0;
+    }
+
+    if (source != NULL) {
+        while (fgets(line, sizeof line, source) != NULL) {
+            int id;
+            int sold;
+            int remaining;
+            double price;
+            char name[100];
+            char category;
+            int cart_index;
+
+            if (sscanf(line, "%d,%99[^,],%c,%lf,%d,%d",
+                       &id, name, &category, &price, &sold, &remaining) != 6) {
+                if (fputs(line, temporary) == EOF) {
+                    ok = 0;
+                    break;
+                }
+                continue;
+            }
+
+            for (cart_index = 0; cart_index < cartCount; ++cart_index) {
+                if (cart[cart_index].id == id) {
+                    break;
+                }
+            }
+            if (cart_index == cartCount) {
+                if (fputs(line, temporary) == EOF) {
+                    ok = 0;
+                    break;
+                }
+                continue;
+            }
+            if (updated[cart_index]) {
+                continue;
+            }
+
+            if (sold < 0 || sold > INT_MAX - cart[cart_index].qty) {
+                ok = 0;
+                break;
+            }
+
+            int item_found = 0;
+            for (int category_index = 0;
+                 category_index < 4 && !item_found; ++category_index) {
+                for (int item_index = 0;
+                     item_index < counts[category_index]; ++item_index) {
+                    if (items[category_index][item_index].id == id) {
+                        remaining = items[category_index][item_index].stock;
+                        category = categories[category_index];
+                        item_found = 1;
+                        break;
+                    }
+                }
+            }
+            if (!item_found) {
+                ok = 0;
+                break;
+            }
+
+            if (fprintf(temporary, "%d,%s,%c,%.2f,%d,%d\n",
+                        cart[cart_index].id, cart[cart_index].name, category,
+                        cart[cart_index].price,
+                        sold + cart[cart_index].qty, remaining) < 0) {
+                ok = 0;
+                break;
+            }
+            updated[cart_index] = 1;
+        }
+
+        if (ferror(source)) {
+            ok = 0;
+        }
+        if (fclose(source) != 0) {
+            ok = 0;
+        }
+    }
+
+    for (int cart_index = 0; ok && cart_index < cartCount; ++cart_index) {
+        if (updated[cart_index]) {
+            continue;
+        }
+
+        int found = 0;
+        for (int category_index = 0; category_index < 4 && !found; ++category_index) {
+            for (int item_index = 0; item_index < counts[category_index]; ++item_index) {
+                if (items[category_index][item_index].id == cart[cart_index].id) {
+                    if (fprintf(temporary, "%d,%s,%c,%.2f,%d,%d\n",
+                                cart[cart_index].id, cart[cart_index].name,
+                                categories[category_index], cart[cart_index].price,
+                                cart[cart_index].qty,
+                                items[category_index][item_index].stock) < 0) {
+                        ok = 0;
+                    }
+                    found = 1;
+                    break;
+                }
+            }
+        }
+        if (!found) {
+            ok = 0;
+        }
+    }
+
+    if (fclose(temporary) != 0) {
+        ok = 0;
+    }
+    if (ok && !replaceFile(temporary_path, sales_path)) {
+        ok = 0;
+    }
+    if (!ok) {
+        remove(temporary_path);
+    }
+    return ok;
+}
+
+static int appendOrderReport(CartItem cart[], int cartCount,
+                             FoodItem items[][200], const int counts[]) {
+    FILE *report = fopen("../data/reportdata.csv", "a");
     if (report == NULL) {
+        return 0;
+    }
+
+    int ok = updateSalesReport(cart, cartCount, items, counts);
+    if (!ok) {
+        fclose(report);
         return 0;
     }
 

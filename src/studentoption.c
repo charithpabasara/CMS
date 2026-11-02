@@ -63,22 +63,18 @@ static int read_integer(const char *prompt, int minimum, int maximum, int *value
 void studentOption(void)
 {
     int option;
-    int back;
 
     for (;;)
     {
         clearScreen();
-
-        printf(GREEN "╔══════════════════════════════════════════════════════════════════╗\n"RESET);
-        printf(GREEN"║            "YELLOW"HELLO THERE, WHAT'S TODAY!"RESET"                            ║\n"RESET);
-        printf(GREEN"╠══════════════════════════════════════════════════════════════════╣\n"RESET);
-        printf(GREEN"║            " YELLOW "(1) Watch Inventory" RESET "                                   ║\n"RESET);
-        printf(GREEN"║            " YELLOW "(2) Buy Foods" RESET "                                         ║\n"RESET);
-        printf(GREEN"║            " YELLOW "(3) Give Feedback or Complain" RESET "                         ║\n"RESET);
-        printf(GREEN"║            " YELLOW "(4) Go Back (Login Menu)" RESET "                              ║\n"RESET);
-        printf(GREEN"╚══════════════════════════════════════════════════════════════════╝\n" RESET);
-
-
+        printf(GREEN "╔══════════════════════════════════════════════════════════════════╗\n");
+        printf("║            HELLO THERE, WHAT'S TODAY!                            ║\n");
+        printf("╚══════════════════════════════════════════════════════════════════╝\n");
+        printf("║            " YELLOW "(1) Watch Inventory" RESET "                                   ║\n");
+        printf("║            " YELLOW "(2) Buy Foods" RESET "                                         ║\n");
+        printf("║            " YELLOW "(3) Give Feedback or Complain" RESET "                         ║\n");
+        printf("║            " YELLOW "(4) Exit" RESET "                                              ║\n");
+        printf("╚══════════════════════════════════════════════════════════════════╝\n" RESET);
 
         if (!read_integer("Enter option number: ", 1, 4, &option))
         {
@@ -105,7 +101,7 @@ void studentOption(void)
 
             case 4:
                 printf("Exiting\n");
-                exit(1);
+                return;
 
             default:
                 printf("Invalid choice");
