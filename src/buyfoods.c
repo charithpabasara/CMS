@@ -6,6 +6,7 @@
 
 #include "../lib/buyfoods.h"
 #include "../lib/clearscreen.h"
+#include "../lib/data_paths.h"
 #include "../lib/studentoption.h"
 #include "../lib/slowprint.h"
 
@@ -62,15 +63,28 @@ static void printReceipt(CartItem cart[], int cartCount);
 
 // main calls all functions
 int buyFoods() {
-    const char *files[4] = {
-        "../data/menu/meals.csv",
-        "../data/menu/snacks.csv",
-        "../data/menu/beverages.csv",
-        "../data/menu/desserts.csv"
+    static const char *const menu_names[4] = {
+        "menu/meals.csv",
+        "menu/snacks.csv",
+        "menu/beverages.csv",
+        "menu/desserts.csv"
     };
+    char menu_paths[4][512];
+    const char *files[4];
     int choice;
     CartItem cart[200];
     int cartCount = 0;
+
+    for (int i = 0; i < 4; ++i) {
+        if (!cmsBuildDataPath(menu_names[i], menu_paths[i],
+                              sizeof menu_paths[i])) {
+            fprintf(stderr, RED
+                    "Could not locate menu CSV files under data/ or ../data/.\n"
+                    RESET);
+            return 0;
+        }
+        files[i] = menu_paths[i];
+    }
 
     while (1) {
         system(CLEAR);
@@ -359,13 +373,23 @@ static int saveMenusTransactionally(const char *const files[],
 static int updateSalesReport(CartItem cart[], int cartCount,
                              FoodItem items[][200], const int counts[]) {
     static const char categories[] = {'M', 'S', 'B', 'D'};
-    const char *sales_path = "../data/sales.csv";
-    const char *temporary_path = "../data/sales.csv.txn.tmp";
+    char sales_path[512];
+    char temporary_path[512];
     int updated[200] = {0};
     FILE *source;
     FILE *temporary;
     char line[512];
     int ok = 1;
+
+    if (!cmsBuildDataPath("sales.csv", sales_path, sizeof sales_path)) {
+        return 0;
+    }
+    int temporary_length = snprintf(temporary_path, sizeof temporary_path,
+                                    "%s.txn.tmp", sales_path);
+    if (temporary_length < 0 ||
+        (size_t)temporary_length >= sizeof temporary_path) {
+        return 0;
+    }
 
     errno = 0;
     source = fopen(sales_path, "r");
@@ -497,7 +521,13 @@ static int updateSalesReport(CartItem cart[], int cartCount,
 
 static int appendOrderReport(CartItem cart[], int cartCount,
                              FoodItem items[][200], const int counts[]) {
-    FILE *report = fopen("../data/reportdata.csv", "a");
+    char report_path[512];
+    if (!cmsBuildDataPath("reportdata.csv", report_path,
+                          sizeof report_path)) {
+        return 0;
+    }
+
+    FILE *report = fopen(report_path, "a");
     if (report == NULL) {
         return 0;
     }

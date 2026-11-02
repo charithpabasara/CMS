@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../lib/data_paths.h"
 #include "../lib/slowprint.h"
 
 #ifdef _WIN32
@@ -33,8 +34,26 @@ static void displayMenu(FoodItem items[], int count);
 
 int showPrimary()
 {
-    const char *files[4] = {"../data/menu/meals.csv", "../data/menu/snacks.csv","../data/menu/beverages.csv", "../data/menu/desserts.csv"};
+    static const char *const menu_names[4] = {
+        "menu/meals.csv",
+        "menu/snacks.csv",
+        "menu/beverages.csv",
+        "menu/desserts.csv"
+    };
+    char menu_paths[4][512];
+    const char *files[4];
     int choice;
+
+    for (int i = 0; i < 4; ++i) {
+        if (!cmsBuildDataPath(menu_names[i], menu_paths[i],
+                             sizeof menu_paths[i])) {
+            fprintf(stderr, RED
+                    "Could not locate menu CSV files in this project.\n"
+                    RESET);
+            return 0;
+        }
+        files[i] = menu_paths[i];
+    }
 
     while (1) {
         system(CLEAR);
