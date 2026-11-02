@@ -498,9 +498,13 @@ static int updateSalesReport(CartItem cart[], int cartCount,
 static int appendOrderReport(CartItem cart[], int cartCount,
                              FoodItem items[][200], const int counts[]) {
     FILE *report = fopen("../data/reportdata.csv", "a");
-    int ok = updateSalesReport(cart, cartCount, items, counts);
-
     if (report == NULL) {
+        return 0;
+    }
+
+    int ok = updateSalesReport(cart, cartCount, items, counts);
+    if (!ok) {
+        fclose(report);
         return 0;
     }
 
