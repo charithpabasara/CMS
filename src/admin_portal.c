@@ -18,13 +18,54 @@
 #define BOLD    "\033[1m"
 #define RESET   "\033[0m"
 
-void accessreport(int o);
 void newreport();
 
 static void viewSalesReport(void)
 {
- 
-    accessreport(0);
+    FILE *file = fopen("../data/reports.csv", "r");
+    if (file == NULL)
+    {
+        file = fopen("data/reports.csv", "r");
+    }
+
+    char line[256];
+    int found = 0;
+    int id, remains, qty;
+    char name[50];
+    float price, revenue;
+
+    if (file == NULL)
+    {
+        printf(YELLOW "No sales report is available. Please create one first using option 6.\n" RESET);
+        return;
+    }
+
+    printf("\n===== SALES REPORT =====\n");
+    printf("┌──────────┬──────────────────────────┬───────────┬──────────┬──────┬─────────────┐\n");
+    printf("│ ID       │ Name                     │ Price     │ Remains  │ Sold │ Revenue     │\n");
+    printf("├──────────┼──────────────────────────┼───────────┼──────────┼──────┼─────────────┤\n");
+
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        if (sscanf(line, "%d,%49[^,],%f,%d,%d,%f",
+                   &id, name, &price, &remains, &qty, &revenue) == 6)
+        {
+            printf("│ %-8d │ %-24s │ %9.2f │ %8d │ %4d │ %11.2f │\n",
+                   id, name, price, remains, qty, revenue);
+            found = 1;
+        }
+    }
+
+    printf("└──────────┴──────────────────────────┴───────────┴──────────┴──────┴─────────────┘\n");
+    if (ferror(file))
+    {
+        fprintf(stderr, RED "Error reading the sales report.\n" RESET);
+    }
+    else if (!found)
+    {
+        printf("No sales have been recorded.\n");
+    }
+    fclose(file);
 }
 
 void admin_portal(void)
@@ -41,14 +82,14 @@ void admin_portal(void)
         printf(GREEN "╔══════════════════════════════════════════════════════════════════╗\n");
         printf("║                         ADMIN PORTAL                             ║\n");
         printf("╠══════════════════════════════════════════════════════════════════╣\n" RESET);
-        printf("1. View feedback\n");
-        printf("2. Calculate average ratings\n");
-        printf("3. View complaints\n");
-        printf("4. View inventory\n");
-        printf("5. View sales report\n");
-        printf("6. Create new sales report\n"); // Added option
-        printf("7. Exit to main menu\n");       // Shifted exit option
-        printf("\nSelect an option: ");
+        printf(GREEN "1. View feedback\n" RESET);
+        printf(GREEN "2. Calculate average ratings\n" RESET);
+        printf(GREEN "3. View complaints\n" RESET);
+        printf(GREEN "4. View inventory\n" RESET);
+        printf(GREEN "5. View sales report\n" RESET);
+        printf(GREEN "6. Create new sales report\n" RESET);
+        printf(GREEN "7. Exit to main menu\n" RESET);
+        printf(YELLOW "\nSelect an option: " RESET);
 
         if (fgets(input, sizeof(input), stdin) == NULL)
         {
