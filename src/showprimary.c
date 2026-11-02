@@ -85,7 +85,7 @@ int showPrimary()
             case 5:
                 printf(GREEN"\nYou're Now Exiting"RESET);slowPrint(GREEN".....\n"RESET, 200);
                 printf(GREEN"Have a Greate Day Ahead!\n"RESET);
-                exit(1);
+                return 0;
             default:
                 printf("Invalid choice.\n");
                 break;

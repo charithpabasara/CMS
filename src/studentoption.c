@@ -63,7 +63,6 @@ static int read_integer(const char *prompt, int minimum, int maximum, int *value
 void studentOption(void)
 {
     int option;
-    int back;
 
     for (;;)
     {
@@ -87,10 +86,10 @@ void studentOption(void)
             case 1:
                 clearScreen();
                 showPrimary();
-                if (!read_integer("To return, enter 1: ", 1, 1, &back))
+               /* if (!read_integer("To return, enter 1: ", 1, 1, &back))
                 {
                     return;
-                }
+                }*/
                 break;
             case 2:
                 buyFoods();
@@ -102,7 +101,7 @@ void studentOption(void)
 
             case 4:
                 printf("Exiting\n");
-                exit(1);
+                return;
 
             default:
                 printf("Invalid choice");

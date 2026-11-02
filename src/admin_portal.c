@@ -24,6 +24,10 @@ void newreport();
 static void viewSalesReport(void)
 {
     FILE *file = fopen("../data/reports.csv", "r");
+    if (file == NULL)
+    {
+        file = fopen("data/reports.csv", "r");
+    }
     char line[256];
     int found = 0;
 
@@ -83,14 +87,14 @@ void admin_portal(void)
         printf(GREEN "╔══════════════════════════════════════════════════════════════════╗\n");
         printf("║                         ADMIN PORTAL                             ║\n");
         printf("╠══════════════════════════════════════════════════════════════════╣\n" RESET);
-        printf("1. View feedback\n");
-        printf("2. Calculate average ratings\n");
-        printf("3. View complaints\n");
-        printf("4. View inventory\n");
-        printf("5. View sales report\n");
-        printf("6. Create new sales report\n"); // Added option
-        printf("7. Exit to main menu\n");       // Shifted exit option
-        printf("\nSelect an option: ");
+        printf(GREEN "1. View feedback\n" RESET);
+        printf(GREEN "2. Calculate average ratings\n" RESET);
+        printf(GREEN "3. View complaints\n" RESET);
+        printf(GREEN "4. View inventory\n" RESET);
+        printf(GREEN "5. View sales report\n" RESET);
+        printf(GREEN "6. Create new sales report\n" RESET);
+        printf(GREEN "7. Exit to main menu\n" RESET);
+        printf(YELLOW "\nSelect an option: " RESET);
 
         if (fgets(input, sizeof(input), stdin) == NULL)
         {

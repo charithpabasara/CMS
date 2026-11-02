@@ -25,6 +25,54 @@ typedef struct{
 
 } fStock;
 
+static int write_js_string(FILE *file, const char *text)
+{
+    if (fputc('"', file) == EOF)
+    {
+        return 0;
+    }
+
+    for (const unsigned char *character = (const unsigned char *)text;
+         *character != '\0'; ++character)
+    {
+        const char *escape = NULL;
+        switch (*character)
+        {
+            case '"': escape = "\\\""; break;
+            case '\\': escape = "\\\\"; break;
+            case '\b': escape = "\\b"; break;
+            case '\f': escape = "\\f"; break;
+            case '\n': escape = "\\n"; break;
+            case '\r': escape = "\\r"; break;
+            case '\t': escape = "\\t"; break;
+            case '<': escape = "\\u003C"; break;
+            case '>': escape = "\\u003E"; break;
+            case '&': escape = "\\u0026"; break;
+            default: break;
+        }
+
+        if (escape != NULL)
+        {
+            if (fputs(escape, file) == EOF)
+            {
+                return 0;
+            }
+        }
+        else if (*character < 0x20)
+        {
+            if (fprintf(file, "\\u%04X", *character) < 0)
+            {
+                return 0;
+            }
+        }
+        else if (fputc(*character, file) == EOF)
+        {
+            return 0;
+        }
+    }
+
+    return fputc('"', file) != EOF;
+}
 
 
 int reports() {
@@ -113,6 +161,10 @@ void accessreport(){
     int br[50] [2];
 
     rpt = fopen("../data/reports.csv","r");
+    if (rpt == NULL)
+    {
+        rpt = fopen("data/reports.csv", "r");
+    }
 
     if (rpt == NULL){
 
@@ -152,13 +204,13 @@ void accessreport(){
             printf("├───────────────────────────────────────────────────────────────────────────┼─────────────────┤\n");
 
             tot += p.rev;
-            br[ht] [1] = p.q;
-
+            if (ht < (int)(sizeof br / sizeof br[0]))
+            {
+                br[ht][0] = p.id;
+                br[ht][1] = p.q;
+                ht++;
+            }
         }
-
-        br[ht] [0] = p.id;
-
-        ht++;
 
     }
 
@@ -180,6 +232,9 @@ void newreport(){
     FILE *nrpt;
     FILE *sales;
     FILE *rp;
+    const char *data_dir = "../data";
+    char html_path[256];
+    char report_path[256];
 
     char buffer[MAX_LINE];
 
@@ -189,11 +244,18 @@ void newreport(){
     sales = fopen("../data/sales.csv", "r");
     if (sales == NULL)
     {
-        perror("Could not open sales data");
-        return;
+        data_dir = "data";
+        sales = fopen("data/sales.csv", "r");
+        if (sales == NULL)
+        {
+            perror("Could not open sales data (tried ../data/sales.csv and data/sales.csv)");
+            return;
+        }
     }
 
-    rp = fopen("../data/reports/report.html", "w+");
+    snprintf(html_path, sizeof html_path, "%s/reports/report.html", data_dir);
+    snprintf(report_path, sizeof report_path, "%s/reports.csv", data_dir);
+    rp = fopen(html_path, "w+");
     if (rp == NULL)
     {
         perror("Could not create HTML report");
@@ -201,7 +263,7 @@ void newreport(){
         return;
     }
 
-    nrpt = fopen("../data/reports.csv", "w");
+    nrpt = fopen(report_path, "w");
     if (nrpt == NULL)
     {
         perror("Could not create sales report");
@@ -222,14 +284,17 @@ void newreport(){
             s.rev = s.price * s.q;
 
         
-            fprintf(rp,"\t\t{ id: \"%04d\", name: \"%s\", price: %.2f, qty: %d, revenue: %.2f },\n",s.id, s.name, s.price, s.q, s.rev);
+                fprintf(rp, "\t\t{ id: \"%04d\", name: ", s.id);
+                write_js_string(rp, s.name);
+                fprintf(rp, ", price: %.2f, qty: %d, revenue: %.2f },\n",
+                        s.price, s.q, s.rev);
             fprintf(nrpt,"%d,%s,%.2f,%d,%d,%.2f\n",s.id, s.name, s.price, i.q, s.q, s.rev);
 
         }
     }
 
-    fprintf(rp,"];\n\n    // 2. Populate the HTML Table dynamically\n    const tableBody = document.getElementById('table-body');\n    salesData.forEach(item => {\n        let row = `<tr>\n            <td>${item.id}</td>\n            <td>${item.name}</td>\n            <td style=\"text-align: right;\">${item.price.toFixed(2)}</td>\n            <td style=\"text-align:center;\">${item.qty}</td>\n            <td class=\"text-right\">${item.revenue.toFixed(2)}</td>\n        </tr>`;\n        tableBody.innerHTML += row;\n    });\n\n    // 3. Append total row\n    const tfoot = document.createElement('tfoot');\n       tfoot.innerHTML = `<tr style=\"border: 1px solid black;\"><td colspan = '4' class=\"text-right\"><strong>Total (LKR) :</strong></td><td  style=\"border: 1px solid black;\" class=\"text-right\">${salesData.reduce((sum, item) => sum + item.revenue, 0).toFixed(2)}</td></tr>`;\n      document.querySelector('table').appendChild(tfoot);\n\n       // 3. Render High-Fidelity Revenue Bar Chart (Zero-dependency & Animation-free for instant headless hook printing)\n    const revContainer = document.getElementById('revenueChartContainer');\n    const maxRevenue = Math.max(...salesData.map(item => item.revenue));\n\n        salesData.forEach(item => {\n        const pct = (item.revenue / maxRevenue) * 100;\n        const barRow = `\n            <div class=\"bar-chart-track\">\n                <div class=\"bar-lbl\" title=\"${item.name}\">${item.name}</div>\n                <div class=\"bar-bg\">\n                    <div class=\"bar-fill\" style=\"width: ${pct}%%;\"></div>\n                </div>\n                <div style=\"font-size: 12px; font-weight: 600; width: 65px; text-align: right;\">${item.revenue.toFixed(0)}</div>\n            </div>`;\n        revContainer.innerHTML += barRow;\n    });\n\n    // 4. Render High-Fidelity Vector Doughnut Chart\n    const qtyContainer = document.getElementById('quantityChartContainer');\n    const totalQty = salesData.reduce((sum, item) => sum + item.qty, 0);\n");
-    fprintf(rp,"    const colors = ['#2ecc71', '#e74c3c', '#f1c40f', '#9b59b6', '#3498db', '#1abc9c', '#16a085', '#27ae60', '#2980b9', '#8e44ad', '#34495e', '#2c3e50', '#f39c12', '#e67e22', '#d35400', '#c0392b', '#ecf0f1', '#bdc3c7', '#95a5a6', '#7f8c8d', '#1abc9c', '#16a085', '#2ecc71', '#27ae60', '#3498db', '#2980b9', '#9b59b6', '#8e44ad', '#34495e', '#2c3e50'   ];\n\n    let svgContent = `<svg class=\"donut-svg\" viewBox=\"0 0 42 42\">\n        <circle cx=\"21\" cy=\"21\" r=\"15.91549430918954\" fill=\"#fff\"></circle>`;\n\n    let currentOffset = 0;\n    salesData.forEach((item, index) => {\n        const pct = (item.qty / totalQty) * 100;\n        const color = colors[index %% colors.length];\n        svgContent += `<circle class=\"donut-segment\" cx=\"21\" cy=\"21\" r=\"15.91549430918954\" \n            stroke=\"${color}\" stroke-dasharray=\"${pct} ${100 - pct}\" stroke-dashoffset=\"${100 - currentOffset}\"></circle>`;\n        currentOffset += pct;\n    });\n\n    svgContent += `</svg><div class=\"legend-list\">`;\n    salesData.forEach((item, index) => {\n        const color = colors[index %% colors.length];\n        svgContent += `\n            <div class=\"legend-item\">\n                <div class=\"legend-color\" style=\"background-color: ${color};\"></div>\n                <span>${item.name} (${item.qty})</span>\n            </div>`;\n    });\n    svgContent += `</div>`;\n    qtyContainer.innerHTML += svgContent;\n\n    // 5. Execution Milestone Handshake\n    // Your headless C routine detects this print state string via console callbacks to initiate immediate PDF layout printing.\n    console.log(\"REPORT_GENERATION_COMPLETE\");\n</script>\n\n</body>\n</html>");
+    fprintf(rp,"];\n\n    const escapeHtml = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;');\n\n    // 2. Populate the HTML Table dynamically\n    const tableBody = document.getElementById('table-body');\n    salesData.forEach(item => {\n        let row = `<tr>\n            <td>${item.id}</td>\n            <td>${escapeHtml(item.name)}</td>\n            <td style=\"text-align: right;\">${item.price.toFixed(2)}</td>\n            <td style=\"text-align:center;\">${item.qty}</td>\n            <td class=\"text-right\">${item.revenue.toFixed(2)}</td>\n        </tr>`;\n        tableBody.innerHTML += row;\n    });\n\n    // 3. Append total row\n    const tfoot = document.createElement('tfoot');\n       tfoot.innerHTML = `<tr style=\"border: 1px solid black;\"><td colspan = '4' class=\"text-right\"><strong>Total (LKR) :</strong></td><td  style=\"border: 1px solid black;\" class=\"text-right\">${salesData.reduce((sum, item) => sum + item.revenue, 0).toFixed(2)}</td></tr>`;\n      document.querySelector('table').appendChild(tfoot);\n\n       // 3. Render High-Fidelity Revenue Bar Chart (Zero-dependency & Animation-free for instant headless hook printing)\n    const revContainer = document.getElementById('revenueChartContainer');\n    const maxRevenue = Math.max(...salesData.map(item => item.revenue));\n\n        salesData.forEach(item => {\n        const safeName = escapeHtml(item.name);\n        const pct = (item.revenue / maxRevenue) * 100;\n        const barRow = `\n            <div class=\"bar-chart-track\">\n                <div class=\"bar-lbl\" title=\"${safeName}\">${safeName}</div>\n                <div class=\"bar-bg\">\n                    <div class=\"bar-fill\" style=\"width: ${pct}%%;\"></div>\n                </div>\n                <div style=\"font-size: 12px; font-weight: 600; width: 65px; text-align: right;\">${item.revenue.toFixed(0)}</div>\n            </div>`;\n        revContainer.innerHTML += barRow;\n    });\n\n    // 4. Render High-Fidelity Vector Doughnut Chart\n    const qtyContainer = document.getElementById('quantityChartContainer');\n    const totalQty = salesData.reduce((sum, item) => sum + item.qty, 0);\n");
+    fprintf(rp,"    const colors = ['#2ecc71', '#e74c3c', '#f1c40f', '#9b59b6', '#3498db', '#1abc9c', '#16a085', '#27ae60', '#2980b9', '#8e44ad', '#34495e', '#2c3e50', '#f39c12', '#e67e22', '#d35400', '#c0392b', '#ecf0f1', '#bdc3c7', '#95a5a6', '#7f8c8d', '#1abc9c', '#16a085', '#2ecc71', '#27ae60', '#3498db', '#2980b9', '#9b59b6', '#8e44ad', '#34495e', '#2c3e50'   ];\n\n    let svgContent = `<svg class=\"donut-svg\" viewBox=\"0 0 42 42\">\n        <circle cx=\"21\" cy=\"21\" r=\"15.91549430918954\" fill=\"#fff\"></circle>`;\n\n    let currentOffset = 0;\n    salesData.forEach((item, index) => {\n        const pct = (item.qty / totalQty) * 100;\n        const color = colors[index %% colors.length];\n        svgContent += `<circle class=\"donut-segment\" cx=\"21\" cy=\"21\" r=\"15.91549430918954\" \n            stroke=\"${color}\" stroke-dasharray=\"${pct} ${100 - pct}\" stroke-dashoffset=\"${100 - currentOffset}\"></circle>`;\n        currentOffset += pct;\n    });\n\n    svgContent += `</svg><div class=\"legend-list\">`;\n    salesData.forEach((item, index) => {\n        const color = colors[index %% colors.length];\n        svgContent += `\n            <div class=\"legend-item\">\n                <div class=\"legend-color\" style=\"background-color: ${color};\"></div>\n                    <span>${escapeHtml(item.name)} (${item.qty})</span>\n            </div>`;\n    });\n    svgContent += `</div>`;\n    qtyContainer.innerHTML += svgContent;\n\n    // 5. Execution Milestone Handshake\n    // Your headless C routine detects this print state string via console callbacks to initiate immediate PDF layout printing.\n    console.log(\"REPORT_GENERATION_COMPLETE\");\n</script>\n\n</body>\n</html>");
 
     printf("Report Created Successfully....\n\n");
     usleep(2500000);
@@ -237,8 +302,13 @@ void newreport(){
 
     printf("\n\n");
 
-
-    fclose(nrpt);
+    if (fclose(nrpt) != 0)
+    {
+        perror("Could not finish sales report");
+        fclose(sales);
+        fclose(rp);
+        return;
+    }
     accessreport();
 
     printf("\n\n");

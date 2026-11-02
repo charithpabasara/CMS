@@ -5,8 +5,7 @@
 
 CCMS stores application data in CSV and text files under `data/`. The project
 contains customer and administrator workflows, as well as a report-generation
-module. Some of these modules are not currently connected in the configured
-build task; see [Build status](#build-status) before trying to compile.
+module.
 
 ## Features
 
@@ -19,8 +18,8 @@ build task; see [Build status](#build-status) before trying to compile.
 - **Feedback:** Submit a positive order ID, food and service ratings (1–5), and
   a comment. Administrators can review feedback, calculate average ratings,
   and view feedback where either rating is 2 or lower.
-- **Administrator reports:** The source includes options to view a generated
-  report and generate a new report from `data/sales.csv`.
+- **Administrator reports:** View a generated report or generate a new report
+  from the sales data maintained by the ordering workflow.
 
 ## Requirements
 
@@ -31,35 +30,20 @@ build task; see [Build status](#build-status) before trying to compile.
 - Keep the project directories and files together, especially `src/`, `lib/`,
   and `data/`.
 
-## Build status
+## Build
 
-The current `.vscode/tasks.json` task does **not** build successfully as
-configured. `src/admin_portal.c` calls `newreport()`, but the task omits
-`src/reports.c`, where that function is defined. Adding that source alone is
-not enough: `src/reports.c` also calls `html_to_pdf()`, implemented in
-`src/headless.c`. The reporting sources include Windows-specific dependencies,
-so a Linux build is not established by this project configuration.
-
-The configured task's core source list is:
+The repository does not include a `.vscode/tasks.json` build task. Build the
+application with GCC from the repository root:
 
 ```text
-src/main.c
-src/reg.c
-src/login.c
-src/admin_auth.c
-src/admin_portal.c
-src/clearscreen.c
-src/buyfoods.c
-src/feedback.c
-src/showprimary.c
-src/studentoption.c
+gcc -std=c17 src/main.c src/reg.c src/login.c src/admin_auth.c \
+  src/admin_portal.c src/clearscreen.c src/buyfoods.c src/feedback.c \
+  src/showprimary.c src/studentoption.c src/reports.c src/headless.c \
+  src/filter.c -o cms
 ```
 
-In Visual Studio Code, **Terminal → Run Build Task** (or **Ctrl+Shift+B**)
-uses this incomplete list and currently fails at link time with an undefined
-reference to `newreport`. The report-enabled executable has not been verified
-with a corrected build command. `src/home.c` is a separate legacy program with
-its own `main()` and must not be added to this application's source list.
+`src/home.c` is a separate legacy program with its own `main()` and must not be
+added to this application's source list.
 
 ## Run location and data paths
 
@@ -98,12 +82,12 @@ The opening menu provides:
   review it, and confirm the order.
 - **Give Feedback or Complain** records an order ID, two 1–5 ratings, and a
   comment; the customer can submit or cancel.
-- The fourth student-menu option is marked **under development**.
+- **Exit** returns to the main menu.
 
-On order confirmation, the application checks current item availability and
-updates menu stock. It appends sales lines to `data/reportdata.csv`. If the
-report append fails after stock has been saved, the order may already have
-changed inventory.
+On order confirmation, the application checks current item availability,
+updates menu stock, and updates `data/sales.csv` for administrator reports. It
+also appends order details to `data/reportdata.csv`. If saving either sales
+file fails after stock has been saved, inventory may already have changed.
 
 ### Administrator portal
 
@@ -127,14 +111,13 @@ admin password has already been changed, use the saved password instead.
 | `data/menu/desserts.csv` | Dessert catalogue and stock |
 | `data/feedback.csv` | Submitted customer feedback |
 | `data/reportdata.csv` | Sales lines appended by the order workflow |
-| `data/sales.csv` | Input consumed by the separate report-generation module |
+| `data/sales.csv` | Per-item sales totals and remaining stock used by reports |
 | `data/reports.csv` | Generated administrator report data |
 | `data/reports/report.html` | Generated HTML report |
 | `data/reports/visual_report.pdf` | Intended PDF export destination |
 
-`reportdata.csv` and `sales.csv` are separate files. The current source does not
-automatically transfer order records from `reportdata.csv` into `sales.csv`;
-report generation depends on `sales.csv` being present and populated.
+The order workflow updates `sales.csv` so administrator reports include
+confirmed purchases. `reportdata.csv` remains a separate order-detail log.
 
 The `ADMIN_FILE` environment variable can override the administrator-record
 path. `CREDENTIALS_FILE` can override the regular-user credential path in
